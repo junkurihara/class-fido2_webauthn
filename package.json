@@ -50,8 +50,8 @@
     "webpack-merge": "4.2.2"
   },
   "dependencies": {
-    "@fidm/x509": "~1.2.1",
-    "cbor": "~5.0.1",
+    "@fidm/x509": "1.2.1",
+    "cbor": "5.0.1",
     "js-crypto-utils": "0.18.2",
     "js-encoding-utils": "0.5.6"
   }
