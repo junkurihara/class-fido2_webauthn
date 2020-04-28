@@ -24,6 +24,7 @@
 \usepackage{amssymb} % AMS-TeX
 \usepackage{setspace}
 \usepackage{multirow}
+\usepackage{udline} % udline.sty
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -101,11 +102,36 @@
 \end{frame}
 
 \begin{frame}{認証とは}
- 
+\begin{block}{認証}
+ 「何らかの手段」で\alert{対象の正当性を確認する}こと。
+\end{block}
+\begin{itemize}
+ \item メッセージの正当性を確認 $\Rightarrow$ メッセージ認証
+ \item サービス利用ユーザの正当性を確認 $\Rightarrow$ ユーザ認証
+ \item etc.
+\end{itemize}
+
+\vspace{2ex}
+
+※このスライドで単純に「認証」と呼んだときは、\ul{認証対象を「正規ユーザ本人」としたユーザ認証・本人認証を指す}こととする。
 \end{frame}
 
 \begin{frame}{パスワード認証}
- 
+\begin{itemize}
+\item サービスの利用者の識別子 (ID) と対応するパスワードをサービス事業者に登録、サービス利用時に利用者が自分のIDとパスワードを入力する。
+\item パスワードは個人の記憶にのみ存在するため、\alert{パスワードを知っている人はそのサービスに登録してる本人と同一人物}と考えることができる。
+\end{itemize}
+
+おそらく、誰にとっても最も馴染み深い認証方式！
+
+\end{frame}
+
+\begin{frame}
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{Figs/password-auth.pdf}\\
+\caption{単純なパスワード認証}
+\end{figure}
 \end{frame}
 
 \begin{frame}{パスワード認証の危うさ}
@@ -124,7 +150,7 @@
 
 \begin{itemize}
  \item FID2 CTAP: ITU-Tで勧告として国際標準化
- \item \alert{FIDO2 WebAuthn}P: W3Cで勧告として国際標準化
+ \item \alert{FIDO2 WebAuthn}P: W3Cで勧告として国際標準化\footnote[frame]{\scriptsize \url{https://www.w3.org/2019/03/pressrelease-webauthn-rec.html.ja}}
 \end{itemize}
  
 \end{frame}
