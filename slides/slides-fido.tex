@@ -116,13 +116,31 @@
 ※このスライドで単純に「認証」と呼んだときは、\ul{認証対象を「正規ユーザ本人」としたユーザ認証・本人認証を指す}こととする。
 \end{frame}
 
-\begin{frame}{パスワード認証}
+\begin{frame}{本人認証の3つの要素}
+本人認証において、正当性確認のため検証されるものは大きく3要素に分類。
+\begin{itemize}
+ \item \textbf{知識}\\
+$\Rightarrow$ 本人しか知らない知識を持っていればOK (ex. パスワード)
+ \item \textbf{所有物}\\
+$\Rightarrow$ 本人しか持っていない物を提示できればOK (ex. HWキー)
+ \item \textbf{生体}\\
+$\Rightarrow$ 本人の体の一部を提示できればOK (ex. 指紋)
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.7\linewidth]{Figs/auth-three-elements.pdf}
+\end{center}
+
+\end{frame}
+
+\begin{frame}{オンラインサービスでのパスワード認証}
 \begin{itemize}
 \item サービスの利用者の識別子 (ID) と対応するパスワードをサービス事業者に登録、サービス利用時に利用者が自分のIDとパスワードを入力する。
 \item パスワードは個人の記憶にのみ存在するため、\alert{パスワードを知っている人はそのサービスに登録してる本人と同一人物}と考えることができる。
 \end{itemize}
 
-おそらく、誰にとっても最も馴染み深い認証方式！
+\begin{center}
+おそらく、誰にとっても最も馴染み深い認証方式！ 
+\end{center}
 
 \end{frame}
 
@@ -130,18 +148,31 @@
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{Figs/password-auth.pdf}\\
-\caption{単純なパスワード認証}
+\caption{オンラインでの単純なパスワード認証}
 \end{figure}
 \end{frame}
 
-\begin{frame}{パスワード認証の危うさ}
- 
+\begin{frame}{オンラインでのパスワード認証の問題}
+英数字・記号を組み合わせたパスワードは、
+\begin{itemize}
+ \item 攻撃者にとって比較的\textbf{予測しやすい}\footnote[frame]{\scriptsize しかもオンラインだと予測→認証トライを繰り返せる}
+ \item 「強い」パスワードを使わせるには\textbf{ユーザ教育が必要}\footnote[frame]{\scriptsize 教育なしだと覚え易く「弱い」ものを利用しがち}
+ \item \textbf{覚えられない}
+ \item etc...
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=0.2\linewidth]{Figs/password-forget.pdf}
+\end{center}
+\structure{予測できず、誰が使っても強力で、確実に認証できる方法}が必要\\
+$\Rightarrow$ \alert{ハードウェアセキュリティキーを使った認証}が人気に
+
 \end{frame}
 
 \begin{frame}{FIDO (Fast IDentity Online)}
 
 \begin{block}{\small FIDO}
-業界団体FIDO Alliance\footnote[frame]{\scriptsize \url{https://fidoalliance.org}}の策定する、生体認証をベースとしたオンライン認証技術。
+業界団体FIDO Alliance\footnote[frame]{\scriptsize \url{https://fidoalliance.org}}の策定する、ハードウェアセキュリティキー+生体認証\footnote[frame]{\scriptsize すなわち、「所有物」と「生体」の二要素を同時に使った認証が可能。}をベースとしたオンラインでの本人認証技術。
 \end{block}
 
 \end{frame}
