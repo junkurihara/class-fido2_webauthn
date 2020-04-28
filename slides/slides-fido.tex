@@ -153,7 +153,7 @@ $\Rightarrow$ 本人の体の一部を提示できればOK (ex. 指紋)
 \end{frame}
 
 \begin{frame}{オンラインでのパスワード認証の問題}
-英数字・記号を組み合わせたパスワードは、
+英数字・記号を組み合わせたパスワード:
 \begin{itemize}
  \item 攻撃者にとって比較的\textbf{予測しやすい}\footnote[frame]{\scriptsize しかもオンラインだと予測→認証トライを繰り返せる}
  \item 「強い」パスワードを使わせるには\textbf{ユーザ教育が必要}\footnote[frame]{\scriptsize 教育なしだと覚え易く「弱い」ものを利用しがち}
@@ -161,43 +161,113 @@ $\Rightarrow$ 本人の体の一部を提示できればOK (ex. 指紋)
  \item etc...
 \end{itemize}
 
+\vspace{-5ex}
 \begin{center}
 \includegraphics[width=0.2\linewidth]{Figs/password-forget.pdf}
 \end{center}
+\vspace{-2ex}
+
 \structure{予測できず、誰が使っても強力で、確実に認証できる方法}が必要\\
-$\Rightarrow$ \alert{ハードウェアセキュリティキーを使った認証}が人気に
+$\Rightarrow$ \alert{ハードウェアセキュリティキーを使った認証}が人気に\\
+$\Rightarrow$ \textbf{FIDOはそのような手法の\ul{標準化された方式}}
 
 \end{frame}
 
-\begin{frame}{FIDO (Fast IDentity Online)}
+\begin{frame}{FIDO}
 
-\begin{block}{\small FIDO}
-業界団体FIDO Alliance\footnote[frame]{\scriptsize \url{https://fidoalliance.org}}の策定する、ハードウェアセキュリティキー+生体認証\footnote[frame]{\scriptsize すなわち、「所有物」と「生体」の二要素を同時に使った認証が可能。}をベースとしたオンラインでの本人認証技術。
+\begin{block}{\small FIDO (Fast IDentity Online)}
+業界団体FIDO Alliance\footnote[frame]{\scriptsize \url{https://fidoalliance.org}}の策定する、\alert{ハードウェアセキュリティキー+生体認証\footnote[frame]{\scriptsize すなわち、「所有物」と「生体」の二要素を同時に使った認証が可能。}をベースとしたオンラインでの本人認証技術}。
 \end{block}
 
+現在はFIDO2 (v2.0) が最新の規格。以降、FIDO2の内容について触れていく。
+
+\vspace{2ex}
+
+厳密には、\structure{FIDO2はパスワードレス認証をサポートしつつも、パスワード+デバイス・生体認証の多要素での認証もサポートする}。
+
 \end{frame}
 
-\begin{frame}{FIDO1からFIDO2へ}
-
+\begin{frame}{FIDO認証概略}
+FIDO認証の特徴:
 \begin{itemize}
- \item FID2 CTAP: ITU-Tで勧告として国際標準化
- \item \alert{FIDO2 WebAuthn}P: W3Cで勧告として国際標準化\footnote[frame]{\scriptsize \url{https://www.w3.org/2019/03/pressrelease-webauthn-rec.html.ja}}
+ \item 公開鍵暗号を利用した、オンラインでの認証方式の提供
+ \item 認証器によるローカルでの本人認証
+ \item 認証器内部に閉じた署名生成\\ $\Rightarrow$\alert{秘密鍵・パスワード等の秘密情報は外部に出ない}
 \end{itemize}
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Figs/FIDO2-auth.pdf}
+\caption{FIDO認証概略}
+\end{center}
+\end{figure}
+\end{frame}
+
+\begin{frame}{FIDO2の要素}
+FIDO2は、\alert{WebAuthn (Web Authentication)\footnote[frame]{\tiny Spec: \url{https://www.w3.org/TR/webauthn-1/}}と、CTAP (Client-to-Authenticator Protocol)\footnote[frame]{\tiny Spec: \url{https://fidoalliance.org/specs/fido2/fido-client-to-authenticator-protocol-v2.1-rd-20191217.html}}の2つの要素で構成}される。
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Figs/FIDO2-Graphic-v2.png}
+\caption{\footnotesize \textcopyright FIDO Alliance, from \url{https://fidoalliance.org/specifications/}}
+\end{center}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\small 
+\begin{itemize}
+ \item \textbf{WebAuthn}: WebAPIと、(端末付属or外部の)認証器・WebApp・サーバ間のハイレイヤのデータフローを規定。
+ \item \textbf{CTAP}: ブラウザ・ネイティブAppと外部デバイスの認証器間のローレイヤのプロトコルとAPIを規定。
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{Figs/FIDO2-spec-structure.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\begin{block}{FIDO2 WebAuthn}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\begin{block}{FIDO2 CTAP}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\begin{exampleblock}{\small 補足: FIDO1}
+\small
+FIDO1 (v1.x) は、以下の2つの要素で構成されている。
+\begin{itemize}
+ \item UAF (Universal Authentication Framework): 生体認証機能を持つFIDO対応端末 (スマートフォン等) で\structure{パスワードレス認証}を行う機構。USB接続などの外部HWセキュリティキーは利用できない。
+ \item U2F (Universal 2nd Factor)\footnote[frame]{\scriptsize U2FはFIDO2規格ではCTAP1と改称。FIDO2で追加された仕様はCTAP2と呼ばれる。}: ID・パスワード認証に加えた\structure{2要素認証}を行うのに、外部HWセキュリティキーを利用可能とする機構。
+\end{itemize}
+FIDO2は、UAFとU2Fを統合し、さらに外部HWキーを用いてもパスワードレス認証可能な、より利便性の高い規格と見做せる。
+\end{exampleblock}
  
 \end{frame}
 
 
 \begin{frame}
-\frametitle{FIDO2デバイス}
+\frametitle{FIDO2対応デバイス}
 \textbf{Security Key by Yubico}
 \begin{center}
 \includegraphics[width=0.6\linewidth]{Figs/security-key-by-yubico.png}
 \end{center}
-FIDO2 webauthn/U2F専用のデバイス
+FIDO2専用\footnote[frame]{\scriptsize FIDO2 CTAP1=FIDO1 U2Fには対応}のデバイス
 \end{frame}
 
 
 \begin{frame}{FIDO2標準化状況}
+
+FIDOは業界団体の策定した規格ではあるが、
+
+\begin{itemize}
+ \item FIDO2 CTAP: ITU-Tで勧告として国際標準化
+ \item \alert{FIDO2 WebAuthn}: W3Cで勧告として国際標準化\footnote[frame]{\scriptsize \url{https://www.w3.org/2019/03/pressrelease-webauthn-rec.html.ja}}
+\end{itemize}
+
+と、デバイスとブラウザ間の通信プロトコル・認証プロトコルの両者共に国際標準として策定済。
  
 \end{frame}
 
