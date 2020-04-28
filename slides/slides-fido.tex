@@ -1,128 +1,40 @@
+%#!uplatex
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[12pt,dvipdfmx]{beamer}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% pdfの栞・プロパティの字化けを防ぐ
-\usepackage{atbegshi}
-%\AtBeginShipoutFirst{\special{pdf:tounicode 90ms-RKSJ-UCS2}} %Windows
-\AtBeginShipoutFirst{\special{pdf:tounicode EUC-UCS2}} %Linux, Mac
+\documentclass[12pt,dvipdfmx,uplatex]{beamer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%% hyperref 文字化け対策
+%%%
+\usepackage{pxjahyper}
 \usepackage{hyperref}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%
-%%% テーマの指定、省略時は default になる
+%%% 各種パッケージ
 %%%
-
- % フレームの指定、省略可
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% THEME
-  %\usetheme{AnnArbor}
-  %\usetheme{Antibes}
-  %\usetheme{Bergen}
-  %\usetheme{Berkeley}
-  %\usetheme{Berlin}
-  \usetheme{Boadilla}
-  %\usetheme{boxes}
-  %\usetheme{CambridgeUS}
-  %\usetheme{Copenhagen}
-  %\usetheme{Darmstadt}
-  %\usetheme{default}
-  %\usetheme{Dresden}
-  %\usetheme{Frankfurt}
-  %\usetheme{Goettingen}
-  %\usetheme{Hannover}
-  %\usetheme{Ilmenau}
-  %\usetheme{JuanLesPins}
-  %\usetheme{Luebeck}
-  %\usetheme{Madrid}
-  %\usetheme{Malmoe}
-  %\usetheme{Marburg}
-  %\usetheme{Montpellier}
-  %\usetheme{PaloAlto}
-  %\usetheme{Pittsburgh}
-  %\usetheme{Rochester}
-  %\usetheme{Singapore}
-  %\usetheme{Szeged}
-  %\usetheme{Warsaw}
-
-% 省略可
-%%%%%%%%%%%%%%%%%%%%%%%%%%%% COLOR THEME
-  %\usecolortheme{albatross}
-  %\usecolortheme{beetle}
-  %\usecolortheme{crane}
-  %\usecolortheme{default}
-  %\usecolortheme{dolphin}
-  %\usecolortheme{dove}
-  %\usecolortheme{fly}
-  %\usecolortheme{lily}
-  %\usecolortheme{orchid}
-  %\usecolortheme{rose}
-  %\usecolortheme{seagull}
-  %\usecolortheme{seahorse}
-  %\usecolortheme{sidebartab}
-  %\usecolortheme{structure}
-  %\usecolortheme{whale}
-
-% ヘッダ、フッタ、フレーム等を指定、省略可
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%% OUTER THEME
-  %\useoutertheme{default}
-  %\useoutertheme{infolines}
-  %\useoutertheme{miniframes}
-  %\useoutertheme{shadow}
-  %\useoutertheme{sidebar}
-  %\useoutertheme{smoothbars}
-  %\useoutertheme{smoothtree}
-  %\useoutertheme{split}
-  %\useoutertheme{tree}
-
-% タイトル、section, itemize/enumerate 環境、
-% theorem 環境、図, 参考文献などのスタイルを指定、
-% 省略可
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%% INNER THEME
-  %\useinnertheme{circles}
-  %\useinnertheme{default}
-  %\useinnertheme{inmargin}
-  \useinnertheme{rectangles}
-  %\useinnertheme{rounded}
-
-
-%\usefonttheme{}	% 省略可
-%\logo{}		% 省略可
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% navi. symbolsは目立たないが，dvipdfmxを使うと機能しないので非表示に
-\setbeamertemplate{navigation symbols}{}
-
-% 各種パッケージ
 \usepackage{graphicx}
 %\usepackage{url,cite}
 \usepackage{amsmath}
 \usepackage{amsthm} \theoremstyle{definition} %theorem環境が斜体になるので注意
 \usepackage{amssymb} % AMS-TeX
 \usepackage{setspace}
+\usepackage{multirow}
 
-% \AtBeginSection[] % Do nothing for \section*
-% { \begin{frame}<beamer> \frametitle{}
-%    \tableofcontents[currentsection,subsectionstyle=hide]
-%  \end{frame} } 
-
-%appendixをページカウントしない
-\newcommand{\backupbegin}{
-   \newcounter{framenumberappendix}
-   \setcounter{framenumberappendix}{\value{framenumber}}
-}
-\newcommand{\backupend}{
-   \addtocounter{framenumberappendix}{-\value{framenumber}}
-   \addtocounter{framenumber}{\value{framenumberappendix}} 
-}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 本文・数式フォント
-%\usepackage{palatino,mathpazo}
-%\usepackage{times,mathptmx}
-\usepackage[varg]{txfonts}
-%\usepackage[varg]{pxfonts}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%% 本文・数式フォント
+%%%
+\usepackage{newtxtext}
+\usepackage[varg]{newtxmath}
+%\usepackage{newpxtext}
+%\usepackage[varg]{newpxmath}
 
 % \mathcal(\cal)の扱い
 %\DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n} %computer modern
@@ -135,87 +47,13 @@
 % \DeclareFontSubstitution{U}{txmia}{m}{it}
 % \DeclareMathSymbol{v}{\mathalpha}{lettersA}{"33} %"
 
-\usepackage{multirow}
-
-%上線 widebar, Widebar
-\usepackage{accents}
-\makeatletter
-\def\widebar{\accentset{{\cc@style\underline{\mskip11mu}}}}
-\makeatother
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% 定理環境
-% \newtheorem{theorem}{Theorem}
-% \newtheorem{lemma}[theorem]{Lemma}
-% \newtheorem{corollary}[theorem]{Corollary}
-% \newtheorem{definition}[theorem]{Definition}
-% \newtheorem{example}[theorem]{Example}
-\newtheorem{proposition}{Proposition}
-\newtheorem{remark}{Remark}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 各種コマンド定義等
-\def\Fig#1{Fig.\@\ref{#1}}
-\def\Table#1{Table~\ref{#1}}
-\def\Eq#1{Eq.\@(\ref{#1})}
-\def\Eqs#1{Eqs.\@(\ref{#1})}
-\def\Thm#1{Theorem~\ref{#1}}
-\def\Lma#1{Lemma~\ref{#1}}
-\def\Sect#1{Section~\ref{#1}}
-\def\Rmk#1{Remark~\ref{#1}}
-\def\Prop#1{Proposition~\ref{#1}}
-\def\Coro#1{Corollary~\ref{#1}}
-\def\Def#1{Definition~\@\ref{#1}}
-\def\Prob#1{Problem~\@\ref{#1}}
-\def\ie{{i.\@e.\@,~}}
-\def\eg{{e.\@g.\@,~}}
-\def\etal{{et al.}}
-
-% 数式環境用
-\def\rank{\mathsf{rank}\, }
-\def\dim{\mathsf{dim}\, }
-\def\rspace{\mathsf{span}}
-\def\supp{\mathsf{supp}}
-%\def\vec#1{\mathbf{#1}}
-\def\F{\mathbb{F}}
-\def\wt{\mathsf{wt}}
-\def\c{\mathcal{C}}
-\def\dc{\mathcal{C}^{\perp}}
-\def\d{\mathcal{D}}
-\def\dd{\mathcal{D}^{\perp}}
-\def\g{\mathcal{G}}
-\def\dg{\mathcal{G}^{\perp}}
-\def\p{\mathcal{P}}
-% \def\rspace{\mathsf{span}}
-\def\supp{\mathsf{supp}}
-\def\ker{\mathsf{Ker\ }}
-
-%\def\bari#1{\{\widebar{#1}\}}
-\def\bari#1{\,\overline{{\!\{#1\}\!}}\,}
-%\def\bari#1{\bar{\{#1\}}}
-\def\vecxi{Z_{\bari{i}}}
-%\def\vecsxi{\vec{z}_i}
-\def\tvector{X}
-\def\tpackets{X_1,\dots,X_n}
-\def\mvector{S}
-\def\mpackets{S_1,\dots,S_l}
-\def\rvector{Y}
-\def\wvector{W}
-\def\cvector{C}
-\def\cword{C_{1},\dots,C_{l+n}}
-\def\pcword{C_{l+1},\dots,C_{l+n}}
-\def\randvector{R}
-
-\def\compmat{\Phi}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%
 %%%  日本語フォントをゴシックに、数式フォントを太字に変更する
 %%%
+\usepackage[deluxe]{otf}
 \renewcommand{\kanjifamilydefault}{\gtdefault}
 \renewcommand{\familydefault}{\sfdefault}
 
@@ -224,21 +62,23 @@
 %\setbeamertemplate{frametitle}[default][center]
 \usefonttheme{professionalfonts} 
 
+%%%
+% Suppress Warning in the case of uplatex
+\DeclareFontShape{JY2}{hgt}{b}{n}{<->ssub*hgt/bx/n}{}
+\DeclareFontShape{JT2}{hgt}{b}{n}{<->ssub*hgt/bx/n}{}
+
 %\mathversion{bold} %数式フォントを太字に
 
-%\def\vec#1{\mbox{\boldmath $#1$}}
+\input{./beamer-preamble.tex}
+\input{./beamer-symdef.tex}
 
-
-%\logo{\includegraphics[width=2cm]{titech_logo.eps}}
-
-%\setbeamertemplate{caption}[numbered]
 %%%
 %%% 著者など
 %%%
 \title[Modern Authentication]{Modern Authentication}
-\subtitle{FIDO2 Web Authenticationを学ぶ}
+\subtitle{FIDO2 Web Authentication (WebAuthn) を学ぶ}
 \author[Jun Kurihara]{栗原 淳}
-\institute[]{}
+\institute[U-Hyogo/Zettant]{兵庫県立大学 大学院応用情報科学研究科 \\ 株式会社ゼタント}
 \date[]{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -260,6 +100,35 @@
  {\Large はじめに}
 \end{frame}
 
+\begin{frame}{認証とは}
+ 
+\end{frame}
+
+\begin{frame}{パスワード認証}
+ 
+\end{frame}
+
+\begin{frame}{パスワード認証の危うさ}
+ 
+\end{frame}
+
+\begin{frame}{FIDO (Fast IDentity Online)}
+
+\begin{block}{\small FIDO}
+業界団体FIDO Alliance\footnote[frame]{\scriptsize \url{https://fidoalliance.org}}の策定する、生体認証をベースとしたオンライン認証技術。
+\end{block}
+
+\end{frame}
+
+\begin{frame}{FIDO1からFIDO2へ}
+
+\begin{itemize}
+ \item FID2 CTAP: ITU-Tで勧告として国際標準化
+ \item \alert{FIDO2 WebAuthn}P: W3Cで勧告として国際標準化
+\end{itemize}
+ 
+\end{frame}
+
 
 \begin{frame}
 \frametitle{FIDO2デバイス}
@@ -269,6 +138,12 @@
 \end{center}
 FIDO2 webauthn/U2F専用のデバイス
 \end{frame}
+
+
+\begin{frame}{FIDO2標準化状況}
+ 
+\end{frame}
+
 
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
