@@ -101,6 +101,41 @@
  {\Large はじめに}
 \end{frame}
 
+\begin{frame}{はじめに}
+この講義では、
+\begin{itemize}
+ \item パスワード認証に代わるモダンな認証方式「FIDO」の概要
+ \item FIDOの認証をWebブラウザ経由で利用する「FIDO2 WebAuthn」の利用
+\end{itemize}
+のさわりを学ぶ。
+\end{frame}
+
+\begin{frame}{この講義の対象と事前準備}
+対象:
+\begin{itemize}
+\item 暗号・セキュリティ技術に興味がある初学者
+\item Webに新しい認証技術を導入したいWeb系のエンジニア
+\end{itemize}
+
+\vspace{2ex}
+
+必須ではないが触って楽しむのには必要な事前準備:
+\begin{itemize}
+\item Bash/Zsh, Gitが使えるようになっていること
+\item Node.js, npm, yarnが使えるようになっていること
+\item Google Chrome系ブラウザ and/or Firefoxが利用可能なこと
+\end{itemize}
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{パスワード認証からFIDOへ}
+\begin{frame}
+\centering
+{\Large パスワード認証からFIDOへ}
+\end{frame}
+
 \begin{frame}{認証とは}
 \begin{block}{認証}
  「何らかの手段」で\alert{対象の正当性を確認する}こと。
@@ -177,7 +212,7 @@ $\Rightarrow$ \textbf{FIDOはそのような手法の\ul{標準化された方�
 \begin{frame}{FIDO}
 
 \begin{block}{\small FIDO (Fast IDentity Online)}
-業界団体FIDO Alliance\footnote[frame]{\scriptsize \url{https://fidoalliance.org}}の策定する、\alert{ハードウェアセキュリティキー+生体認証\footnote[frame]{\scriptsize すなわち、「所有物」と「生体」の二要素を同時に使った認証が可能。}をベースとしたオンラインでの本人認証技術}。
+業界団体FIDO Alliance\footnote[frame]{\scriptsize \url{https://fidoalliance.org}}の策定する、\alert{ハードウェアセキュリティキー+生体認証\footnote[frame]{\scriptsize すなわち、「所有物」と「生体」の二要素を同時に使った認証が可能。}と公開鍵暗号方式をベースとしたオンラインでの本人認証技術}。
 \end{block}
 
 現在はFIDO2 (v2.0) が最新の規格。以降、FIDO2の内容について触れていく。
@@ -324,24 +359,73 @@ FIDOは業界団体の策定した規格ではあるが、
 この後、FIDO2 WebAuthnの内容に実際に触れ、最新の認証技術について理解を深めてみよう。\footnote[frame]{\scriptsize 今回はWeb技術から学ぶセキュリティに注力するため、ローレイヤのFIDO2 CTAPについては別の機会で。}
 \end{frame}
 
-\section{FIDO2 WebAuthnの構造}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{サンプルコードの準備}
 \begin{frame}
 \centering
-{\Large FIDO2 WebAuthnの構造}
+{\Large サンプルコードの準備}
+\end{frame}
+
+\begin{frame}{準備}
+説明を聞きつつ手を動かすため、まず環境準備。
+
+\vspace{2ex}
+
+今回は以下の2つをWebAuthnのAPIをCallしながら試す。
+\begin{itemize}
+\item 認証器を使ってユーザの公開鍵証明書を生成\\
+$\Rightarrow$ 認証器からのメッセージを解してみて\structure{実際に証明書および生の公開鍵を取り出してみる}。
+\item 認証器を使ってユーザ認証用の証明を生成\\
+$\Rightarrow$ 署名を解してみて、登録時に取り出した公開鍵で\structure{署名が通ることを確認してみる}。
+\end{itemize}
+$\Rightarrow$ この2つが\alert{FIDO2 WebAuthnのパスワードレス認証の基礎}。
 \end{frame}
 
 \begin{frame}
+\frametitle{環境}
 
+以下の環境が前提:
+\begin{itemize}
+ \item Node.js LTS ($\ge$ 12)がインストール済でyarnが使える\footnote[frame]{インストールコマンド: \texttt{npm i -g yarn}}
+ \item ブラウザとして、Google Chrome (系ブラウザ)、もしくはFirefoxがインストール済み
+ \item Visual Studio Code や WebStorm などの統合開発環境がセットアップ済みだとなお良い
+\end{itemize}
 \end{frame}
 
-\section{FIDO2 WebAuthnの中身を解析}
+\begin{frame}
+\frametitle{JavaScriptプロジェクトの準備}
+\begin{enumerate}
+\item \alert{プロジェクトのGitHubリポジトリをClone}\\
+\begin{exampleblock}{}
+\footnotesize
+\$ \texttt{git clone https://github.com/junkurihara/xxxxxxxxxxxxxxxxxxxx}\\
+\$ \texttt{cd sample}
+\end{exampleblock}
+\item 依存パッケージのインストール
+\begin{exampleblock}{}
+\$ \texttt{yarn install}
+\end{exampleblock}
+\item ライブラリのビルド
+\begin{exampleblock}{}
+\$ \texttt{yarn build}
+\end{exampleblock}
+\end{enumerate}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{FIDO2 WebAuthnのフロー}
 \begin{frame}
 \centering
-{\Large FIDO2 WebAuthnの中身を解析}
+{\Large FIDO2 WebAuthnのフロー}
+\end{frame}
+
+\begin{frame}{準備}
+これから、WebAuthnの構造を見ながら、実際にブラウザ経由で認証器とやりとりをしていく。
 \end{frame}
 
 \begin{frame}
- 
+ Node.jsとかの準備
 \end{frame}
 
 \section{まとめ}
