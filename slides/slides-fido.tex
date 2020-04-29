@@ -217,24 +217,48 @@ FIDO2は、\alert{WebAuthn (Web Authentication)\footnote[frame]{\tiny Spec: \url
 \begin{frame}
 \small 
 \begin{itemize}
- \item \textbf{WebAuthn}: WebAPIと、(端末付属or外部の)認証器・WebApp・サーバ間のハイレイヤのデータフローを規定。
- \item \textbf{CTAP}: ブラウザ・ネイティブAppと外部デバイスの認証器間のローレイヤのプロトコルとAPIを規定。
+ \item \textbf{WebAuthn}: 内部/外部認証器をCallするWebAPIと、WebApp・サーバ間のデータフローを規定。
+ \item \textbf{CTAP}: 外部認証器をCallするAPIと、クライアント/プラットフォームと認証器の通信プロトコルを規定。
 \end{itemize}
 \begin{center}
-\includegraphics[width=0.8\linewidth]{Figs/FIDO2-spec-structure.pdf}
+\includegraphics[width=0.7\linewidth]{Figs/FIDO2-spec-structure.pdf}
 \end{center}
 \end{frame}
 
 \begin{frame}
 \begin{block}{\small FIDO2 CTAP\footnote[frame]{\tiny \url{https://fidoalliance.org/specs/fido-v2.0-ps-20190130/fido-client-to-authenticator-protocol-v2.0-ps-20190130.html}}}
+USB/BLE/NFC等で接続されたHWセキュリティキーなどの\alert{外部認証器と、クライアントアプリ(ブラウザ等)およびプラットフォーム(OS)との間の通信プロトコル}を規定。以下の要素で構成。
+\begin{itemize}
+\item USB/BLE/NFCなど物理層の種別に応じた、通信確立のためのプロトコル
+\item 認証器での処理をCallするAPI
+\begin{itemize}
+\item 外部認証器の情報取得
+\item PINによるローカルでのユーザ認証\footnote[frame]{\tiny 指紋認証やジェスチャーなどは認証器のみで完結するのでAPIは用意されない。署名生成などのときに認証器内での認証を要求するフラグを立てる。}
+\item 認証器組込の秘密鍵での、ユーザ秘密鍵・証明書生成
+\item ユーザ秘密鍵による署名の生成、など
+\end{itemize}
+\end{itemize}
 \end{block}
+ブラウザ・OS(のドライバ)は上記を実装した上で、より上位のWebAuthnのプロトコルをサポート。
 \end{frame}
 
 
 \begin{frame}
-\begin{block}{\small FIDO2 WebAuthn}
+\begin{block}{\small FIDO2 WebAuthn\footnote[frame]{\tiny https://www.w3.org/TR/webauthn-1/}}
+\alert{Webブラウザをプラットフォームとし、内部/外部認証器によって生成される署名を用いた、オンラインサーバでのユーザ認証のプロトコル}を規定。
+より具体的には、以下を規定する。
+\begin{itemize}
+ \item 認証器でのユーザの公開鍵証明書の生成、サーバへの登録プロトコル
+ \item 認証器での署名生成、サーバでの認証プロトコル
+ \item 認証器とやりとりするためブラウザが具備すべきWeb API\footnote[frame]{\tiny JavaScriptでCallされるAPI。ブラウザの内部でさらに認証器のAPI (CTAPや内部API) をCallする。}。大雑把に以下の2種類。
+\begin{itemize}
+ \item ユーザの公開鍵証明書の生成 (Credential Creation)
+ \item ユーザ秘密鍵による署名の生成 (Assertion Generation)
+\end{itemize}
+\end{itemize}
 \end{block}
-CTAPはブラウザがサポートしているので、Web Appの観点からは、CTAP上で動作するWebAuthnのみ意識すれば良い。
+認証器とのやり取りはブラウザ/プラットフォームがサポート。\\
+$\Rightarrow$ 基本的にWeb Appの観点からは、WebAuthnのみを意識する。
 \end{frame}
 
 
@@ -292,7 +316,7 @@ FIDOは業界団体の策定した規格ではあるが、
  \item \textbf{FIDO2 WebAuthn}: W3Cで勧告として国際標準化\footnote[frame]{\scriptsize \url{https://www.w3.org/2019/03/pressrelease-webauthn-rec.html.ja}}
 \end{itemize}
 
-と、認証器とブラウザ間のローレイヤの通信プロトコル、ハイレイヤの認証プロトコルの両者共に国際標準として策定済。
+と、認証器とプラットフォーム/ブラウザ間の通信プロトコル、サーバ・ブラウザ間の認証プロトコルの両者共に国際標準として策定済。
 
 \end{frame}
 
