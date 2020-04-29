@@ -420,12 +420,38 @@ $\Rightarrow$ この2つが\alert{FIDO2 WebAuthnのパスワードレス認証�
 {\Large FIDO2 WebAuthnのフロー}
 \end{frame}
 
-\begin{frame}{準備}
-これから、WebAuthnの構造を見ながら、実際にブラウザ経由で認証器とやりとりをしていく。
+\begin{frame}{FIDO2 WebAuthnのフローの参加エンティティ}
+WebAuthnの動作フローでは、以下の3つの(抽象化された)参加エンティティが存在。
+\begin{enumerate}
+ \item \textbf{Relaying Party (RP)}: サービス提供者の認証サーバ
+ \item \textbf{ブラウザ+RPのWebApp}: ユーザおよび認証器とやり取り
+ \item \textbf{Authenticator}: 内部/外部認証器。以下をセキュアに保持。
+\begin{itemize}
+\item \textbf{\alert{Attestation Key Pair}}: 公開鍵・秘密鍵ペア
+\item \textbf{\alert{Attestation Certificate}}: 上記の公開鍵に対し、FIDO2で承認された製造元が署名した証明書
+\end{itemize}
+\end{enumerate}
+\end{frame}
+\begin{frame}
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Figs/webauthn-entities.pdf}
+\end{center}
+WebAPIとして用意されるWebAuthn APIは、ブラウザ経由でWebAppが認証器とやりとりする役割を担う。
 \end{frame}
 
-\begin{frame}
- Node.jsとかの準備
+\begin{frame}{FIDO2におけるAttestation}
+FIDO2では、「Attestation」という重要な概念が存在する
+\begin{block}{\small Attestation (出生証明)}
+\end{block}
+Attestation Certificateがあれば、Attestation Private Keyの署名とACを投げればPKIの文脈で正当な認証器で作られた署名なことが証明できる。というような図を入れる。
+\end{frame}
+
+\begin{frame}{FIDO2 WebAuthn ユーザ登録フロー}
+WebAPIの観点では、認証器で新しいユーザ公開鍵証明書を生成。
+\end{frame}
+
+\begin{frame}{FIDO2 WebAuthn ユーザ認証フロー}
+WebAPIの観点では、認証器においてユーザ秘密鍵で署名生成。
 \end{frame}
 
 \section{まとめ}
