@@ -226,14 +226,17 @@ FIDO2は、\alert{WebAuthn (Web Authentication)\footnote[frame]{\tiny Spec: \url
 \end{frame}
 
 \begin{frame}
-\begin{block}{FIDO2 WebAuthn}
+\begin{block}{\small FIDO2 CTAP\footnote[frame]{\tiny \url{https://fidoalliance.org/specs/fido-v2.0-ps-20190130/fido-client-to-authenticator-protocol-v2.0-ps-20190130.html}}}
 \end{block}
 \end{frame}
 
+
 \begin{frame}
-\begin{block}{FIDO2 CTAP}
+\begin{block}{\small FIDO2 WebAuthn}
 \end{block}
+CTAPはブラウザがサポートしているので、Web Appの観点からは、CTAP上で動作するWebAuthnのみ意識すれば良い。
 \end{frame}
+
 
 \begin{frame}
 \begin{exampleblock}{\small 補足: FIDO1}
@@ -250,12 +253,33 @@ FIDO2は、UAFとU2Fを統合し、さらに外部HWキーを用いてもパス�
 
 
 \begin{frame}
-\frametitle{FIDO2対応デバイス}
-\textbf{Security Key by Yubico}
-\begin{center}
-\includegraphics[width=0.6\linewidth]{Figs/security-key-by-yubico.png}
-\end{center}
-FIDO2専用\footnote[frame]{\scriptsize FIDO2 CTAP1=FIDO1 U2Fには対応}のデバイス
+\frametitle{FIDO2対応の認証器}
+USB/NFC/BLE等対応の外部認証器 (External Authenticator)、端末付属の認証器 (On-device/Internal Authenticator) 共々、様々な対応デバイスがリリースされつつある。
+\begin{tabular}{ccc}
+\begin{minipage}[t]{0.3\linewidth}
+\footnotesize
+\centering
+\includegraphics[width=\linewidth]{Figs/security-key-by-yubico.png}\\
+\textbf{Security Key by Yubico}\\
+FIDO2専用\footnote[frame]{\scriptsize FIDO2 CTAP1=FIDO1 U2Fには対応。}
+\end{minipage}
+& 
+\begin{minipage}[t]{0.3\linewidth}
+\footnotesize
+\centering
+\includegraphics[width=\linewidth]{Figs/yubikey-5ci.png}\\
+\textbf{YubiKey 5Ci}\\
+FIDO2+OpenPGP+etc...
+\end{minipage}
+&
+\begin{minipage}[t]{0.3\linewidth}
+\footnotesize
+\centering
+\includegraphics[width=\linewidth]{Figs/macbookpro-touchid.png}\\
+\textbf{MacbookPro TouchID}\footnote[frame]{\scriptsize \textcopyright Apple Inc.}\\
+FIDO2認証可能\footnote[frame]{\scriptsize ブラウザ等がTouchID APIをCallできればFIDO2のOn-device Authenticatorとして動作。Chrome等は対応済。}
+\end{minipage}
+\end{tabular}
 \end{frame}
 
 
@@ -264,11 +288,11 @@ FIDO2専用\footnote[frame]{\scriptsize FIDO2 CTAP1=FIDO1 U2Fには対応}のデ
 FIDOは業界団体の策定した規格ではあるが、
 
 \begin{itemize}
- \item FIDO2 CTAP: ITU-Tで勧告として国際標準化\footnote[frame]{\scriptsize \url{https://fidoalliance.org/fido-alliance-specifications-now-adopted-as-itu-international-standards/}}
- \item \alert{FIDO2 WebAuthn}: W3Cで勧告として国際標準化\footnote[frame]{\scriptsize \url{https://www.w3.org/2019/03/pressrelease-webauthn-rec.html.ja}}
+ \item \textbf{FIDO2 CTAP}: ITU-Tで勧告として国際標準化\footnote[frame]{\scriptsize \url{https://fidoalliance.org/fido-alliance-specifications-now-adopted-as-itu-international-standards/}}
+ \item \textbf{FIDO2 WebAuthn}: W3Cで勧告として国際標準化\footnote[frame]{\scriptsize \url{https://www.w3.org/2019/03/pressrelease-webauthn-rec.html.ja}}
 \end{itemize}
 
-と、認証器とブラウザ間の通信プロトコル、ハイレイヤの認証プロトコルの両者共に国際標準として策定済。
+と、認証器とブラウザ間のローレイヤの通信プロトコル、ハイレイヤの認証プロトコルの両者共に国際標準として策定済。
 
 \end{frame}
 
