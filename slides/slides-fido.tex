@@ -119,6 +119,10 @@
 
 \vspace{2ex}
 
+※但し、ある程度の公開鍵暗号・電子署名の知識を前提とする\footnote[frame]{\scriptsize どういうものか、というのを知っていれば十分。「JavaScriptを使って学ぶEnd-to-Endセキュリティ」の資料を読んでいることを推奨 (\url{https://github.com/junkurihara/class-e2e_security_js})。}
+
+\vspace{2ex}
+
 必須ではないが触って楽しむのには必要な事前準備:
 \begin{itemize}
 \item Bash/Zsh, Gitが使えるようになっていること
@@ -493,15 +497,32 @@ BasicでもHW構造的に\alert{秘密鍵は認証器から取出せない}。
 AttCAでは、認証器のTPMに埋め込まれた鍵を、証明書生成ではなく認証局との暗号通信用に用いる。
 \end{frame}
 
-\begin{frame}{FIDO2 WebAuthn ユーザ登録フロー}
-ユーザ登録は次の2つの処理で構成:
-\begin{itemize}
-\item 認証器でCredential Key Pair生成・Credential Certificateの生成
-\item RPでCredential Certificateの検証・ユーザ登録
-\end{itemize}
+\begin{frame}{WebAuthn ユーザ登録フロー}
+以下のような流れでWebAuthnの認証のための登録を行う。
+\begin{center}
+\includegraphics[width=0.8\linewidth]{Figs/webauthn-registration0.pdf}
+\end{center}
+単純に言うと、\textbf{Credential Certificateを生成、その出生証明を確認・登録}という処理。
+
 \end{frame}
 
-\begin{frame}{FIDO2 WebAuthn ユーザ認証フロー}
+\begin{frame}
+ここから、各ステップでやりとりされるデータを実際に確認していこう。
+\end{frame}
+
+\begin{frame}{WebAuthn ユーザ登録フロー: Credential生成要求}
+a
+\end{frame}
+
+\begin{frame}{WebAuthn ユーザ登録フロー: Credential生成・取り出し}
+a
+\end{frame}
+
+\begin{frame}{WebAuthn ユーザ登録フロー: Attestation!}
+a
+\end{frame}
+
+\begin{frame}{WebAuthn ユーザ認証フロー}
 WebAPIの観点では、認証器においてユーザ秘密鍵で署名生成。
 \end{frame}
 
