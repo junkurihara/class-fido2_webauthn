@@ -459,6 +459,7 @@ $\Rightarrow$ \textbf{認証器に基づくFIDO2認証の安全性は維持}。
 \end{tabular}
 \end{center}
 
+※認証器で生成するユーザの鍵ペアを\alert{Credential Key Pair}、Attestされたその公開鍵証明書を\alert{Credential Certificate}と呼ぶ。
 \end{frame}
 
 \begin{frame}
@@ -473,8 +474,31 @@ $\Rightarrow$ Credential CertificateをAttestation Certificateで検証\\
 $\Rightarrow$ Attestation CertificateをFIDO認証ベンダの公開鍵\footnote[frame]{\scriptsize ルート証明書}で検証
 \end{frame}
 
+\begin{frame}
+\small
+\begin{exampleblock}{\small 補足: Attestationの種類}
+\footnotesize
+\begin{itemize}
+\setlength{\itemsep}{0ex}
+ \item \textbf{Basic}: ベンダが認証器モデルごとに特有のAttestation Key Pairを埋込む。同じモデルの認証器では同じ鍵ペアでも良い。
+ \item \textbf{Self}: Attestation Private Key = Credential Private Keyで、Credential Certificateが自己証明書になる。
+ \item \textbf{AttCA}\footnote[frame]{\scriptsize Attestation Certificate Authority}: Attestation Certificateを動的に生成する手法。外部に信頼できる第三者の認証局を設け、認証器がAttestation (Identity) Key Pairを生成して、認証局へその公開鍵への署名を依頼。
+ \item \textbf{ECDAA}\footnote[frame]{\scriptsize Elliptic Curve based Direct Anonymous Attestation; アルゴリズム仕様は現状ドラフト。}: 楕円曲線上の匿名認証 (Direct Anonymous Attestation; DAA) を利用して、認証器の情報を与えることなく出生証明を実現。
+ \item \textbf{None}: Attestationなし。
+\end{itemize}
+\end{exampleblock}
+\textbf{この資料ではBasic前提}。
+
+BasicでもHW構造的に\alert{秘密鍵は認証器から取出せない}。
+AttCAでは、認証器のTPMに埋め込まれた鍵を、証明書生成ではなく認証局との暗号通信用に用いる。
+\end{frame}
+
 \begin{frame}{FIDO2 WebAuthn ユーザ登録フロー}
-WebAPIの観点では、認証器で新しいユーザ公開鍵証明書を生成。
+ユーザ登録は次の2つの処理で構成:
+\begin{itemize}
+\item 認証器でCredential Key Pair生成・Credential Certificateの生成
+\item RPでCredential Certificateの検証・ユーザ登録
+\end{itemize}
 \end{frame}
 
 \begin{frame}{FIDO2 WebAuthn ユーザ認証フロー}
