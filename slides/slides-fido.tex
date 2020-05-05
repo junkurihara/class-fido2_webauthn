@@ -335,7 +335,7 @@ FIDO2+OpenPGP+etc...
 \footnotesize
 \centering
 \includegraphics[width=\linewidth]{Figs/macbookpro-touchid.png}\\
-\textbf{MacbookPro TouchID}\footnote[frame]{\scriptsize \textcopyright Apple Inc.}\\
+\textbf{MacbookPro TouchID}\\
 FIDO2認証可能\footnote[frame]{\scriptsize ブラウザ等がTouchID APIをCallできればFIDO2のOn-device Authenticatorとして動作。Chrome等は対応済。}
 \end{minipage}
 \end{tabular}
@@ -440,10 +440,37 @@ WebAPIとして用意されるWebAuthn APIは、ブラウザ経由でWebAppが�
 \end{frame}
 
 \begin{frame}{FIDO2におけるAttestation}
-FIDO2では、「Attestation」という重要な概念が存在する
-\begin{block}{\small Attestation (出生証明)}
+FIDO2では、「Attestation」という重要な概念が存在する。
+
+\begin{block}{\small FIDO2におけるAttestation}
+主として、「新しく生成・登録するユーザの公開鍵が、\alert{正しくFIDO2認定を受けている認証器で生成された公開鍵であることを保証する機構}という意味。すなわち、\textbf{出生証明}。
 \end{block}
-Attestation Certificateがあれば、Attestation Private Keyの署名とACを投げればPKIの文脈で正当な認証器で作られた署名なことが証明できる。というような図を入れる。
+\begin{center}
+\begin{tabular}{ll}
+\begin{minipage}[c]{0.8\linewidth}
+Relaying Partyは、出生証明を確認してユーザを登録。\\
+$\Rightarrow$ 偽造認証器を摑まされたユーザの登録を弾ける。\\
+$\Rightarrow$ \textbf{認証器に基づくFIDO2認証の安全性は維持}。
+\end{minipage}
+ &
+\begin{minipage}[c]{0.15\linewidth}
+\includegraphics[width=\linewidth]{Figs/naiyo-shomei.png} 
+\end{minipage}
+\end{tabular}
+\end{center}
+
+\end{frame}
+
+\begin{frame}
+\small 
+Attestationの流れ。Attestationは2段階の証明で成立:
+\begin{center}
+\includegraphics[width=0.7\linewidth]{Figs/webauthn-attestation.pdf}
+\end{center}
+
+ユーザ登録時にユーザ公開鍵(Credential Public Key)を出生証明して登録\\
+$\Rightarrow$ Credential CertificateをAttestation Certificateで検証\\
+$\Rightarrow$ Attestation CertificateをFIDO認証ベンダの公開鍵\footnote[frame]{\scriptsize ルート証明書}で検証
 \end{frame}
 
 \begin{frame}{FIDO2 WebAuthn ユーザ登録フロー}
