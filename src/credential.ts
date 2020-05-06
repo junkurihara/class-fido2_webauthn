@@ -2,7 +2,7 @@ import * as x509 from '@fidm/x509';
 import * as cbor from 'cbor';
 import jseu from 'js-encoding-utils';
 import {getJscu} from './env';
-import {coseToJwk} from "./util";
+import {coseToJwk} from './util';
 
 const checkCredentialId = (
   credential: PublicKeyCredential
@@ -49,10 +49,10 @@ const parseAttestedCredentialData = async (
   return {aaguid, credentialId: jseu.encoder.encodeBase64Url(credentialId), publicKeyPem: pemKey};
 };
 
-export const extractPublicKeyFromPublicKeyCredential = async (
+export const verifyAttestation = async (
   credential: PublicKeyCredential,
   challenge: Uint8Array
-): Promise<{valid: boolean, publicKey?: string}> => {
+): Promise<{valid: boolean, credentialPublicKey?: string, attestationCertificate?: string}> => {
   const jscu = getJscu();
   // https://www.w3.org/TR/webauthn/#registering-a-new-credential
   //check Id
@@ -91,7 +91,7 @@ export const extractPublicKeyFromPublicKeyCredential = async (
 
     // Get Public Key From AuthData
     const parsed = await parseAttestedCredentialData(new Uint8Array(authData));
-    return {valid:true, publicKey: parsed.publicKeyPem};
+    return {valid: true, credentialPublicKey: parsed.publicKeyPem, attestationCertificate: pemCert};
   }
   else return {valid: false};
 };
