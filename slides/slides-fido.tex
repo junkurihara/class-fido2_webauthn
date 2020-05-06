@@ -364,10 +364,10 @@ FIDOは業界団体の策定した規格ではあるが、
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{サンプルコードの準備}
+\section{実験環境の準備}
 \begin{frame}
 \centering
-{\Large サンプルコードの準備}
+{\Large 実験環境の準備}
 \end{frame}
 
 \begin{frame}{準備}
@@ -375,11 +375,11 @@ FIDOは業界団体の策定した規格ではあるが、
 
 \vspace{2ex}
 
-今回は以下の2つをWebAuthnのAPIをCallしながら試す。
+今回は以下の2つをWebAuthnのAPIをCallしながら実験してみる。
 \begin{itemize}
-\item 認証器を使ってユーザの公開鍵証明書を生成\\
+\item 認証器を使って「ユーザ登録」\\
 $\Rightarrow$ 認証器からのメッセージを解してみて\structure{実際に証明書および生の公開鍵を取り出してみる}。
-\item 認証器を使ってユーザ認証用の証明を生成\\
+\item 認証器を使って「ユーザ認証」\\
 $\Rightarrow$ 署名を解してみて、登録時に取り出した公開鍵で\structure{署名が通ることを確認してみる}。
 \end{itemize}
 $\Rightarrow$ この2つが\alert{FIDO2 WebAuthnのパスワードレス認証の基礎}。
@@ -416,12 +416,29 @@ $\Rightarrow$ この2つが\alert{FIDO2 WebAuthnのパスワードレス認証�
 \end{enumerate}
 \end{frame}
 
+\begin{frame}{認証器の準備}
+実験の前に認証器をセットアップしておく。例えば「Security Key by Yubico」の場合は、「YubiKey Manager」をインストールし、PINを設定。\footnote[frame]{\scriptsize 「PIN+認証器へのタッチ」が生体認証という扱い。PIN設定はなくても動作するが、タッチだけで生体認証したことになってしまう。PINではなく指紋認証を使うような認証器では、指紋登録が前もって必要。}
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.4\linewidth]{Figs/yubikey-manager.png}
+\end{center}
+\caption{YubiKey Manager (Mac)}
+\end{figure}
+\end{frame}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{FIDO2 WebAuthnのフロー}
+\section{FIDO2 WebAuthn}
 \begin{frame}
 \centering
-{\Large FIDO2 WebAuthnのフロー}
+{\huge FIDO2 WebAuthn}
+\end{frame}
+
+\subsection{WebAuthn 事始め}
+
+\begin{frame}
+\centering
+{\Large FIDO2 WebAuthn 事始め}
 \end{frame}
 
 \begin{frame}{FIDO2 WebAuthnのフローの参加エンティティ}
@@ -441,6 +458,18 @@ WebAuthnの動作フローでは、以下の3つの(抽象化された)参加エ
 \includegraphics[width=0.9\linewidth]{Figs/webauthn-entities.pdf}
 \end{center}
 WebAPIとして用意されるWebAuthn APIは、ブラウザ経由でWebAppが認証器とやりとりする役割を担う。
+\end{frame}
+
+\begin{frame}{FIDO2 WebAuthnの2つのフロー}
+FIDO2 WebAuthnは、2つの動作フローを規定する。
+\begin{itemize}
+ \item \alert{\textbf{ユーザ登録フロー}}: 認証器を使って、Relaying PartyにユーザのIDや認証情報=公開鍵\footnote[frame]{\scriptsize Credential Public Key/Certificateのこと}を登録する処理
+ \item \alert{\textbf{ユーザ認証フロー}}: 認証器を使って、Relaying Partyに事前に認証情報を登録したユーザ自身であることを証明する処理。
+\end{itemize}
+
+\vspace{2ex}
+
+以降、この2つのフローの中身を見ていくが、その前にFIDO2 WebAuthnにおいて\textbf{登録・認証の安全性を担保するAttestation}という概念について解説しよう。
 \end{frame}
 
 \begin{frame}{FIDO2におけるAttestation}
@@ -497,29 +526,173 @@ BasicでもHW構造的に\alert{秘密鍵は認証器から取出せない}。
 AttCAでは、認証器のTPMに埋め込まれた鍵を、証明書生成ではなく認証局との暗号通信用に用いる。
 \end{frame}
 
+\begin{frame}{この後やってみること}
+\small
+この後は、
+\begin{itemize}
+ \item ユーザ登録フロー 
+ \item ユーザ認証フロー
+\end{itemize}
+の両者において、\ul{localhostでRPを模擬}\footnote[frame]{\scriptsize ブラウザ・RPとのやりとりは標準がないことと、処理フロー・データフローを理解することに重点をおくため。しかしPython Flask等でREST APIでやりとりするサーバは簡単に実装可能。}しつつ、認証器・ブラウザ間でやりとりされるデータと、認証器内部での処理をコードを見ながら確認・解説していく。
+\end{frame}
+
+
+\subsection{WebAuthn ユーザ登録フロー}
+
+\begin{frame}
+\centering
+{\Large FIDO2 WebAuthn ユーザ登録フロー}
+\end{frame}
+
+
 \begin{frame}{WebAuthn ユーザ登録フロー}
 以下のような流れでWebAuthnの認証のための登録を行う。
 \begin{center}
-\includegraphics[width=0.8\linewidth]{Figs/webauthn-registration0.pdf}
+\includegraphics[width=0.9\linewidth]{Figs/webauthn-registration0.pdf}
 \end{center}
-単純に言うと、\textbf{Credential Certificateを生成、その出生証明を確認・登録}という処理。
+単純に言うと、\textbf{認証器でCredential Certificateを生成、その出生証明をRPで確認・登録}という処理。
 
 \end{frame}
 
 \begin{frame}
-ここから、各ステップでやりとりされるデータを実際に確認していこう。
+このユーザ登録の各ステップを、実際のデータを確認しながら追っていく。
 \end{frame}
 
-\begin{frame}{WebAuthn ユーザ登録フロー: Credential生成要求}
+\begin{frame}{WebAuthn ユーザ登録: RPへユーザ登録要求}
+⓪,① ユーザ登録のためCredential生成パラメタをRPから取得。
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Figs/webauthn-registration1.pdf}
+\end{center}
+\textbf{WebAppとRP間の要求・応答フォーマットは規定されていない。}\\
+$\Rightarrow$ RP側の (REST) APIは実装者に任せられている。
+\end{frame}
+
+\begin{frame}
+WebAppがRPから取得するパラメタは以下の通り。\footnote[frame]{\scriptsize UserInfo, RP InfoはWebAppすなわちユーザが自分で定めることも(一応)できる。}
+\begin{itemize}
+ \item \textbf{Challenge}: \alert{暗号学的にランダムな使い捨てのbinary string (最低16bytes, 通常32bytes程度)}
+ \item \textbf{User Info}: ユーザ情報。ID、メールアドレス、名前。
+ \item \textbf{Relaying Party Info}: RP(すなわちサービス)の名前、FQDN、アイコンのアドレス。
+\end{itemize}
+
+\vspace{2ex}
+ブラウザは、これらを\texttt{PublicKeyCredentialCreationOptions} Objectにし、WebAuthn API経由で認証器へCredential生成を要求。
+
+\end{frame}
+
+\begin{frame}{WebAuthn ユーザ登録: 認証器へCredential生成要求}
+②,③ ブラウザのAPIをCallして認証器へCredential生成を要求。
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Figs/webauthn-registration2.pdf}
+\end{center}
+\texttt{PublicKeyCredentialCreationOptions} Objectをブラウザの\texttt{window.navigator.credential.create()}へ入力。
+\end{frame}
+
+\begin{frame}[fragile]
+\small
+実際にJavaScriptのコードを見ていく。
+\begin{exampleblock}{\scriptsize \texttt{PublicKeyCredentialCreationOptions}の構造 (\texttt{./test/credential-params.ts)}}
+{\tiny
+\begin{verbatim}
+const createCredentialDefaultArgs: CredentialCreationOptions = {
+  publicKey: {
+    // Challenge 本当はサーバーで生成した暗号学的に安全な乱数をセット (16bytes以上)
+    challenge: new Uint8Array([0x8C, 0x0A, 0x26, 0xFF, 0x22, ...]).buffer,
+
+    // Relying Party Info (a.k.a. - Service)
+    rp: {
+      id: 'localhost', // テストコードはローカルで走るため
+      name: 'Example RP'
+    },
+
+    // User Info
+    user: {
+      id: new Uint8Array(16),
+      name: 'john.p.smith@example.com',
+      displayName: 'John P. Smith',
+    },
+
+    // 利用したいPublic Key Credential Paramsのリスト (認証器は先頭から試行):
+    pubKeyCredParams: [{
+      type: 'public-key', // As of March 2019, only 'public-key' is accepted.
+      alg: -7 // Signature Algorithm (ECDSA with SHA-256)
+    }],
+
+    // Attestation Type (optional, defaultは'none' (RPによるattestation検証なし))
+    attestation: 'direct', // 'direct'は認証器の生成したAttestationを直接RPに送るタイプ
+
+    // Time Out (optional, in msec)
+    timeout: 60000, // 認証器からの応答をブラウザはどれくらい待つか。
+  }
+};
+\end{verbatim}
+}
+\end{exampleblock}
+\end{frame}
+
+\begin{frame}[fragile]
+\small
+\texttt{PublicKeyCredentialCreationOptions} Objectを使ってブラウザのWebAuthn APIを以下のようにCallすると、\alert{認証器の挿入・接続要求、PIN入力要求がブラウザ通知}される。
+
+\begin{exampleblock}{\scriptsize \texttt{window.navigator.credential.create()}のCall (\texttt{./test/test.spec.ts})}
+{\scriptsize
+\begin{verbatim}
+const cred: Credential|null
+  = await window.navigator.credentials.create(createCredentialDefaultArgs);
+\end{verbatim}
+}
+\end{exampleblock}
+
+\vspace{2ex}
+
+\begin{tabular}{ccc}
+\begin{minipage}{0.4\linewidth}
+ \centering
+ \includegraphics[width=\linewidth]{Figs/webauthn-registration-dialog1.png}\\
+ {\footnotesize 認証器挿入・接続要求}
+\end{minipage}
+ &
+$\Rightarrow$
+&
+\begin{minipage}{0.4\linewidth}
+ \centering
+ \includegraphics[width=\linewidth]{Figs/webauthn-registration-dialog2.png}\\
+ {\footnotesize PINの入力要求}
+\end{minipage}
+\end{tabular}
+\end{frame}
+
+\begin{frame}[fragile]
+この流れは、Shellからサンプルコードのディレクトリで以下を実行すると確認できる。
+\begin{exampleblock}{\footnotesize ユーザ登録→ユーザ認証の一連のテストコードを実行}
+{\footnotesize
+\begin{verbatim}
+$ yarn test
+\end{verbatim}
+}
+\end{exampleblock}
+
+\vspace{2ex}
+ブラウザにダイアログが出たところで認証\footnote[frame]{\scriptsize Security Key by Yubicoの場合はPIN入力}を行えば、\alert{認証器内部でCredentialが生成\&出生証明される。}
+
+\vspace{2ex}
+それでは、次のCredential生成ステップと、生成したCredentialの中身を覗いてみよう。
+\end{frame}
+
+\begin{frame}{WebAuthn ユーザ登録: Credential生成・取り出し}
+
+\end{frame}
+
+\begin{frame}{WebAuthn ユーザ登録: Attestation!}
 a
 \end{frame}
 
-\begin{frame}{WebAuthn ユーザ登録フロー: Credential生成・取り出し}
-a
-\end{frame}
 
-\begin{frame}{WebAuthn ユーザ登録フロー: Attestation!}
-a
+\subsection{WebAuthn ユーザ認証フロー}
+
+\begin{frame}
+\centering
+{\Large FIDO2 WebAuthn ユーザ認証フロー}
 \end{frame}
 
 \begin{frame}{WebAuthn ユーザ認証フロー}
