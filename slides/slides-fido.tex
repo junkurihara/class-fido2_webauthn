@@ -728,7 +728,7 @@ $\Rightarrow$
 
 \begin{frame}[fragile]
 \small
-\texttt{create()}の返り値 \texttt{PublicKeyCredential} Objectは単純に以下の3つの要素で構成されている。
+\texttt{create()}の返り値 \texttt{PublicKeyCredential} Objectは単純に以下の4つの要素で構成されている。
 \begin{exampleblock}{\scriptsize PublicKeyCredentialの構造 (\texttt{\$ yarn test}の途中出力)}
 {\tiny
 \begin{verbatim}
@@ -752,10 +752,11 @@ $\Rightarrow$
 \begin{center}
 \includegraphics[width=0.9\linewidth]{Figs/webauthn-registration4.pdf}
 \end{center}
+\textbf{基本的にこのステップはRPの行うバックエンドの処理}であることに注意。
 \end{frame}
 
 \begin{frame}
-[TBD] ClientDataJSONとattestationObjectの意味と構造。
+ClientDataJSONとattestationObjectの意味と構造。
 
 \begin{itemize}
  \item client data json: challengeへの応答、その検証
