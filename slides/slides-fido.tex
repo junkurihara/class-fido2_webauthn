@@ -444,7 +444,7 @@ $\Rightarrow$ この2つが\alert{FIDO2 WebAuthnのパスワードレス認証�
 \begin{frame}{FIDO2 WebAuthnのフローの参加エンティティ}
 WebAuthnの動作フローでは、以下の3つの(抽象化された)参加エンティティが存在。
 \begin{enumerate}
- \item \textbf{Relaying Party (RP)}: サービス提供者の認証サーバ
+ \item \textbf{Relying Party (RP)}: サービス提供者の認証サーバ
  \item \textbf{ブラウザ+RPのWebApp}: ユーザおよび認証器とやり取り
  \item \textbf{Authenticator}: 内部/外部認証器。以下をセキュアに保持。
 \begin{itemize}
@@ -463,8 +463,8 @@ WebAPIとして用意されるWebAuthn APIは、ブラウザ経由でWebAppが�
 \begin{frame}{FIDO2 WebAuthnの2つのフロー}
 FIDO2 WebAuthnは、2つの動作フローを規定する。
 \begin{itemize}
- \item \alert{\textbf{ユーザ登録フロー}}: 認証器を使って、Relaying PartyにユーザのIDや認証情報=公開鍵\footnote[frame]{\scriptsize Credential Public Key/Certificateのこと}を登録する処理
- \item \alert{\textbf{ユーザ認証フロー}}: 認証器を使って、Relaying Partyに事前に認証情報を登録したユーザ自身であることを証明する処理。
+ \item \alert{\textbf{ユーザ登録フロー}}: 認証器を使って、Relying PartyにユーザのIDや認証情報=公開鍵\footnote[frame]{\scriptsize Credential Public Key/Certificateのこと}を登録する処理
+ \item \alert{\textbf{ユーザ認証フロー}}: 認証器を使って、Relying Partyに事前に認証情報を登録したユーザ自身であることを証明する処理。
 \end{itemize}
 
 \vspace{2ex}
@@ -481,7 +481,7 @@ FIDO2では、「Attestation」という重要な概念が存在する。
 \begin{center}
 \begin{tabular}{ll}
 \begin{minipage}[c]{0.8\linewidth}
-Relaying Partyは、出生証明を確認してユーザを登録。\\
+Relying Partyは、出生証明を確認してユーザを登録。\\
 $\Rightarrow$ 偽造認証器を摑まされたユーザの登録を弾ける。\\
 $\Rightarrow$ \textbf{認証器に基づくFIDO2認証の安全性は維持}。
 \end{minipage}
@@ -572,7 +572,7 @@ WebAppがRPから取得するパラメタは以下の通り。\footnote[frame]{\
 \begin{itemize}
  \item \textbf{Challenge}: \alert{暗号学的にランダムな使い捨てのbinary string (最低16bytes, 通常32bytes程度)}
  \item \textbf{User Info}: ユーザ情報。ID、メールアドレス、名前。
- \item \textbf{Relaying Party Info}: RP(すなわちサービス)の名前、FQDN、アイコンのアドレス。
+ \item \textbf{Relying Party Info}: RP(すなわちサービス)の名前、FQDN、アイコンのアドレス。
 \end{itemize}
 
 \vspace{2ex}
@@ -673,18 +673,134 @@ $ yarn test
 \end{exampleblock}
 
 \vspace{2ex}
-ブラウザにダイアログが出たところで認証\footnote[frame]{\scriptsize Security Key by Yubicoの場合はPIN入力}を行えば、\alert{認証器内部でCredentialが生成\&出生証明される。}
+ブラウザにダイアログが出たところで認証\footnote[frame]{\scriptsize Security Key by Yubicoの場合はPIN入力+タッチ}を行えば、\alert{認証器内部でCredentialが生成\&出生証明される。}
 
 \vspace{2ex}
 それでは、次のCredential生成ステップと、生成したCredentialの中身を覗いてみよう。
 \end{frame}
 
 \begin{frame}{WebAuthn ユーザ登録: Credential生成・取り出し}
+\small
+④,⑤ 認証器でCredential新規生成、Credential Certificateを取得。
+\begin{center}
+ \includegraphics[width=0.9\linewidth]{Figs/webauthn-registration3.pdf}
+\end{center}
+前ステップの\texttt{create()}の返り値として、Attestation CertifiateやCredential Public Key (\texttt{attestationObject})を格納した\texttt{PublicKeyCredential} Objectをブラウザが取得。
+\end{frame}
+
+\begin{frame}
+\small
+前ステップの後、認証器ローカルでの生体認証\footnote[frame]{\scriptsize Security Key by Yubicoの場合、PIN入力の後にタッチすること。}、およびFIDO2 WebAuthnの利用確認が求められる。
+
+\vspace{2ex}
+
+\begin{tabular}{ccc}
+\begin{minipage}{0.4\linewidth}
+ \centering
+ \includegraphics[width=\linewidth]{Figs/webauthn-registration-dialog3.png}\\
+ {\footnotesize 認証要求}
+\end{minipage}
+ &
+$\Rightarrow$
+&
+\begin{minipage}{0.4\linewidth}
+ \centering
+ \includegraphics[width=\linewidth]{Figs/webauthn-registration-dialog4.png}\\
+ {\footnotesize FIDO2利用意思の確認}
+\end{minipage}
+\end{tabular}
+\end{frame}
+
+\begin{frame}
+\small
+認証と利用意思確認が完了すると、認証器内部で以下の処理を実行。
+\begin{enumerate}
+\setlength{\itemsep}{0ex}
+ \item ローカルでの生体認証結果の確認
+ \item \texttt{create()}で入力されたパラメタに応じて、ユーザの新しい鍵ペア `Credential Key Pair' を生成
+ \item 認証器内部のAttestation Private KeyでCredential Key Pairに署名、Credential Certificateを生成
+ \item Credential Certificateを出力\footnote[frame]{\scriptsize Attestation Type: directの場合はAttestation Certificateも出力}
+\end{enumerate}
+\begin{center}
+\includegraphics[width=0.6\linewidth]{Figs/webauthn-attestation.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\small
+\texttt{create()}の返り値 \texttt{PublicKeyCredential} Objectは単純に以下の3つの要素で構成されている。
+\begin{exampleblock}{\scriptsize PublicKeyCredentialの構造 (\texttt{\$ yarn test}の途中出力)}
+{\tiny
+\begin{verbatim}
+'------ [Response from Authenticator: PublicKeyCredential] ------'
+'> Credential ID: HfM8J_xY7mn7bfiHxF7f7MLxf...' ← 生成した公開鍵のID
+'> Credential Raw ID: [object ArrayBuffer]'     ← 生成した公開鍵のIDのバイナリ版
+'> Credential Type: public-key'                 ← 公開鍵証明書なので'public-key'
+'> AuthenticatorAttestationResponse.clientDataJSON: [object ArrayBuffer]'   ← RPのChallengeに対する応答 (バイナリ)
+'> AuthenticatorAttestationResponse.attestationObject: [object ArrayBuffer]'← ここがCredential Certificateが含まれる本体 (バイナリ)
+\end{verbatim}
+}
+\end{exampleblock}
+
+このうち、「\texttt{clientDataJSON}」と「\texttt{attestationObject}」からなる\texttt{AuthenticatorAttestationResponse}をRPに送って検証・登録する。次のステップでその検証について解説する。
+
 
 \end{frame}
 
-\begin{frame}{WebAuthn ユーザ登録: Attestation!}
-a
+\begin{frame}{WebAuthn ユーザ登録: Attestationの検証}
+⑥,⑦,⑧ ブラウザが\texttt{AuthenticatorAttestationResponse}をRPに送って、そこでAttestationの検証とユーザ登録を実行。
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Figs/webauthn-registration4.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}
+[TBD] ClientDataJSONとattestationObjectの意味と構造。
+
+\begin{itemize}
+ \item client data json: challengeへの応答、その検証
+ \item attestationObject:
+\begin{itemize}
+ \item fmt: format = 基本はpacked
+ \item attStmt: attestationCertificateと、それによる検証が可能なSignature
+ \item authData: credentialPublicKeyやそのメタ情報。attestation private keyによる署名対象
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{exampleblock}{\scriptsize attestationObjectの内容の検証結果 (\texttt{\$ yarn test}の途中出力)}
+\tiny
+ \begin{verbatim}
+LOG: '------ [Verification result on PublicKeyCredential.AuthenticatorAttestationResponse] ------'
+LOG: '> Verification result: true' // Credential Public KeyのAttestatationの署名検証成功
+
+LOG: '> Credential Public Key: // 新しく作ったCredential Public Key (毎回変化)
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEt11IqJnVr2Wi4nIip57LPhoAejRG
+TH86zg3S7CUYSFibLqVOQrbQ00ADz9IpYHoKzQCbbHcl3o8Zj7WgHUy1yQ==
+-----END PUBLIC KEY-----'
+
+LOG: '> Attestation Certificate: // 上の公開鍵についてた署名を検証した公開鍵証明書 (固定)
+-----BEGIN CERTIFICATE-----
+MIICvDCCAaSgAwIBAgIEBMX+/DANBgkqhkiG9w0BAQsFADAuMSwwKgYDVQQDEyNZ
+dWJpY28gVTJGIFJvb3QgQ0EgU2VyaWFsIDQ1NzIwMDYzMTAgFw0xNDA4MDEwMDAw
+MDBaGA8yMDUwMDkwNDAwMDAwMFowbTELMAkGA1UEBhMCU0UxEjAQBgNVBAoMCVl1
+YmljbyBBQjEiMCAGA1UECwwZQXV0aGVudGljYXRvciBBdHRlc3RhdGlvbjEmMCQG
+A1UEAwwdWXViaWNvIFUyRiBFRSBTZXJpYWwgODAwODQ3MzIwWTATBgcqhkjOPQIB
+BggqhkjOPQMBBwNCAAQc2Np2EaP17x+IXpULpl2A4zSFU5FYS9R/W3GcUyNcJCHk
+45m9tXNngkGQk1dmYUk8kUwuZyTfk5T8+n3qixgEo2wwajAiBgkrBgEEAYLECgIE
+FTEuMy42LjEuNC4xLjQxNDgyLjEuMTATBgsrBgEEAYLlHAIBAQQEAwIFIDAhBgsr
+BgEEAYLlHAEBBAQSBBD4oBHzjApNFYAGFxEfntx9MAwGA1UdEwEB/wQCMAAwDQYJ
+KoZIhvcNAQELBQADggEBAHcYTO91LRoF8wpThdwthvj6wGNxcLAiYqUZXPX+0Db+
+AGVODSkVvEVSmj+JXmrBzNQel3FW4AupOgbgrJmmcWWEBZyXSpRQtYcl2LTNU0+I
+z9WbyHNN1wQJ9ybFwj608xBuoNRC0rG8wgYbMC4usyRadt3dYOVdQi0cfaksVB2V
+NKnw+ttQUWKoZsPHtuzFx8NlazLQBep1W2T0FCONFEG7x/l+ZcfNhT13azAbaurJ
+2J0/ff6H0PXJP6h+Obne4xfz0+8ujftWDUSh9oaiVRYf+tgam/tzOKyEU38V2liV
+11zMyHKWrXiK0AfyDgb58ky2HSrn/AgE5MW/oXg/CXc=
+-----END CERTIFICATE-----'
+ \end{verbatim}
+\end{exampleblock}
 \end{frame}
 
 
