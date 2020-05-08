@@ -3,8 +3,11 @@
  */
 
 import * as x5c from './credential';
+import {verifyAssertion as verifyAssertion1} from './assertion';
+import {verifyAttestation as verifyAttestation1} from './attestation';
 
-export const verifyAttestation = x5c.verifyAttestation;
-export const verifyAssertion = x5c.verifyAssertion;
+export const parseAuthenticatorResponse = x5c.parseAuthenticatorResponse;
+export const verifyAttestation = verifyAttestation1;
+export const verifyAssertion = verifyAssertion1;
 export const getPublicKeyIdFromAssertion = x5c.getPublicKeyIdFromAssertion;
-export default {verifyAttestation, verifyAssertion, getPublicKeyIdFromAssertion};
+export default {parseAuthenticatorResponse, verifyAttestation, verifyAssertion, getPublicKeyIdFromAssertion};
