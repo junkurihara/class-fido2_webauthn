@@ -492,7 +492,7 @@ $\Rightarrow$ \textbf{認証器に基づくFIDO2認証の安全性は維持}。
 \end{tabular}
 \end{center}
 
-※認証器で生成するユーザの鍵ペアを\alert{Credential Key Pair}、Attestされたその公開鍵証明書を\alert{Credential Certificate}と呼ぶ。
+※認証器で生成するユーザの鍵ペアを\alert{Credential Key Pair}、Attestされたその公開鍵を\alert{Attested Credential Public Key}と呼ぶ。
 \end{frame}
 
 \begin{frame}
@@ -503,7 +503,7 @@ Attestationの流れ。Attestationは2段階の証明で成立:
 \end{center}
 
 ユーザ登録時にユーザ公開鍵(Credential Public Key)を出生証明して登録\\
-$\Rightarrow$ Credential CertificateをAttestation Certificateで検証\\
+$\Rightarrow$ Attested Credential Public Keyの署名をAttestation Certificateで検証\\
 $\Rightarrow$ Attestation CertificateをFIDO認証ベンダの公開鍵\footnote[frame]{\scriptsize ルート証明書}で検証
 \end{frame}
 
@@ -514,7 +514,7 @@ $\Rightarrow$ Attestation CertificateをFIDO認証ベンダの公開鍵\footnote
 \begin{itemize}
 \setlength{\itemsep}{0ex}
  \item \textbf{Basic}: ベンダが認証器モデルごとに特有のAttestation Key Pairを埋込む。同じモデルの認証器では同じ鍵ペアでも良い。
- \item \textbf{Self}: Attestation Private Key = Credential Private Keyで、Credential Certificateが自己証明書になる。
+ \item \textbf{Self}: Attestation Private Key = Credential Private Keyとして、自分の秘密鍵で署名して自己Attestする。
  \item \textbf{AttCA}\footnote[frame]{\scriptsize Attestation Certificate Authority}: Attestation Certificateを動的に生成する手法。外部に信頼できる第三者の認証局を設け、認証器がAttestation (Identity) Key Pairを生成して、認証局へその公開鍵への署名を依頼。
  \item \textbf{ECDAA}\footnote[frame]{\scriptsize Elliptic Curve based Direct Anonymous Attestation; アルゴリズム仕様は現状ドラフト。}: 楕円曲線上の匿名認証 (Direct Anonymous Attestation; DAA) を利用して、認証器の情報を与えることなく出生証明を実現。
  \item \textbf{None}: Attestationなし。
@@ -550,7 +550,7 @@ AttCAでは、認証器のTPMに埋め込まれた鍵を、証明書生成では
 \begin{center}
 \includegraphics[width=0.9\linewidth]{Figs/webauthn-registration0.pdf}
 \end{center}
-単純に言うと、\textbf{認証器でCredential Certificateを生成、その出生証明をRPで確認・登録}という処理。
+単純に言うと、\textbf{認証器でCredential Public Keyを生成、その出生証明をRPで確認・登録}という処理。
 
 \end{frame}
 
@@ -681,7 +681,7 @@ $ yarn test
 
 \begin{frame}{WebAuthn ユーザ登録: Credential生成・取り出し}
 \small
-④,⑤ 認証器でCredential新規生成、Credential Certificateを取得。
+④,⑤ 認証器でCredential新規生成、Credential Public Keyと署名を取得。
 \begin{center}
  \includegraphics[width=0.9\linewidth]{Figs/webauthn-registration3.pdf}
 \end{center}
@@ -718,8 +718,8 @@ $\Rightarrow$
 \setlength{\itemsep}{0ex}
  \item ローカルでの生体認証結果の確認
  \item \texttt{create()}で入力されたパラメタに応じて、ユーザの新しい鍵ペア `Credential Key Pair' を生成
- \item 認証器内部のAttestation Private KeyでCredential Key Pairに署名、Credential Certificateを生成
- \item Credential Certificateを出力\footnote[frame]{\scriptsize Attestation Type: directの場合はAttestation Certificateも出力}
+ \item 認証器内部のAttestation Private KeyでCredential Public Keyに署名
+ \item (Attested) Credential Public Keyとその署名を出力\footnote[frame]{\scriptsize Attestation Type: directの場合はAttestation Certificateも出力}
 \end{enumerate}
 \begin{center}
 \includegraphics[width=0.6\linewidth]{Figs/webauthn-attestation.pdf}
@@ -737,7 +737,7 @@ $\Rightarrow$
 '> Credential Raw ID: [object ArrayBuffer]'     ← 生成した公開鍵のIDのバイナリ版
 '> Credential Type: public-key'                 ← 公開鍵証明書なので'public-key'
 '> AuthenticatorAttestationResponse.clientDataJSON: [object ArrayBuffer]'   ← RPのChallengeに対する応答 (バイナリ)
-'> AuthenticatorAttestationResponse.attestationObject: [object ArrayBuffer]'← ここがCredential Certificateが含まれる本体 (バイナリ)
+'> AuthenticatorAttestationResponse.attestationObject: [object ArrayBuffer]'← ここがCredential Public Keyと署名が含まれる本体 (バイナリ)
 \end{verbatim}
 }
 \end{exampleblock}
@@ -752,40 +752,99 @@ $\Rightarrow$
 \begin{center}
 \includegraphics[width=0.9\linewidth]{Figs/webauthn-registration4.pdf}
 \end{center}
-\alert{基本的にこれはRPの行うバックエンドの処理なことに注意}。
-\end{frame}
-
-\begin{frame}
-
-``TBDあとでちゃんとかく''
-
- ClientDataJSONとattestationObjectの意味と構造。
-
-\begin{itemize}
- \item client data json: challengeへの応答、その検証
- \item attestationObject:
-\begin{itemize}
- \item fmt: format = 基本はpacked
- \item attStmt: attestationCertificateと、それによる検証が可能なSignature
- \item authData: credentialPublicKeyやそのメタ情報。attestation private keyによる署名対象
-\end{itemize}
-\end{itemize}
+\alert{Attestationの検証はRPの行うバックエンドの処理なことに注意。}
 \end{frame}
 
 \begin{frame}[fragile]
-\begin{exampleblock}{\scriptsize attestationObjectの内容の検証結果 (\texttt{\$ yarn test}の途中出力)}
+\texttt{clientDataJSON}はバイナリにエンコードされたJSONで、以下の要素で構成。
+\begin{exampleblock}{\footnotesize \texttt{clientDataJSON}\footnote[frame]{\tiny WebAuthnの認証の時もパラメータの異なるこのオブジェクトが生成される。\url{https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorResponse/clientDataJSON}}の構造。 (\texttt{\$ yarn testの途中結果})}
+\tiny
+\begin{verbatim}
+LOG: '------ [Decoding result of elements of AuthenticatorAttestationResponse] ------'
+LOG: '> Decoded clientDataJSON:
+{
+  "challenge": "o9sKvn8ls2QAMFNyiv_g...", ← 登録処理開始の際、RPが送付したchallenge (base64url)。
+  "origin": "http://localhost:9876",      ← Relying partyのID。今回の例だとlocalhost。
+  "type": "webauthn.create"               ← ユーザ登録のときは\texttt{webauthn.create}固定。
+}'
+\end{verbatim}
+他、\texttt{tokenBindingId}というRPとの通信セッションとの紐付けを行うパラメタ (Optional)。
+\end{exampleblock}
+これは、\textbf{後述する\texttt{attstationObject}がどういうパラメタに対して生成されたのかを示す}一覧という位置づけ。
+\end{frame}
+
+\begin{frame}[fragile]
+\small
+\texttt{attestationObject}はCBORで表現され、以下の要素で構成。
+\begin{exampleblock}{\footnotesize \texttt{attestationObject}\footnote[frame]{\tiny \texttt{clientDataJSON}と異なり、登録の時のみ生成されるオブジェクト。\url{https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAttestationResponse/attestationObject}}の構造。 (\texttt{\$ yarn testの途中結果})}
+{\tiny
+\begin{verbatim}
+[
+  {
+    "fmt": "packed",                      ← フォーマット規定。WebAuthnの場合は"packed"で最適化されている。
+    "attStmt": {                          /* fmt="packed"のとき、Attestation Certificateと署名のフィールド */
+      "alg": -7,                          ← ECDSA with SHA-256で作られた署名という意味 (COSE)
+      "sig": {
+        "type": "Buffer",
+        "data": "MEUCIBJog73SH9q+gu...",  ← "x5c"の証明書で検証可能な署名 (本当はバイナリ)
+      },
+      "x5c": [
+        {
+          "type": "Buffer",
+          "data": "MIICvDCCAaSgAwIB...",  ← これこそがAttestation Certificate!
+        }
+      ]
+    },
+    "authData": {                         /* 署名対象、つまりCredential Public Keyのフィールド */
+      "type": "Buffer",
+      "data": "SZYN5YgOjGh0NBcPZHZg..."   ← Credential Public Keyとそのメタ情報 (本当はバイナリ)
+    }
+  }
+]'
+\end{verbatim}
+}
+\end{exampleblock}
+fmt=``packed''の場合、\textbf{署名は、\texttt{clientDataJSON}のハッシュ値と、\texttt{attestationObject.authData}を連結したデータに対して生成。}
+\end{frame}
+
+\begin{frame}
+\small
+RPは\texttt{attestationObject}と\texttt{clientDataJSON}について以下を検証。
+
+\begin{enumerate}
+ \item \textbf{RP自身が要求したCredential生成なのか？}\\
+$\Rightarrow$ \texttt{clientDataJSON}内部と、RPで保持していたチャレンジの比較
+ \item \textbf{RPのサービスで登録すべきCredential生成なのか？}\\
+\begin{itemize}
+ \item[$\Rightarrow$] \texttt{clientDataJSON}内部のoriginのチェック
+ \item[$\Rightarrow$] \texttt{attestationObject.authData}に含まれるRP IDのチェック
+\end{itemize}
+ \item \textbf{FIDO2で利用可能な正しい認証器を使った登録か？}\\
+\begin{itemize}
+ \item[$\Rightarrow$] \alert{\texttt{clientDataJSON}のハッシュ値と\texttt{authData}について、\texttt{attStmt.sig} (署名) の正しさを\texttt{attStmt.x5c} (Attestation Certificate) を使って検証}
+ \item[$\Rightarrow$] \alert{ルート証明書により、\texttt{attStmt.x5c} の信頼性を検証}
+\end{itemize}
+
+\end{enumerate}
+上記のチェックが全部OKであれば\texttt{authData} (内部のAttested Credential Public Key) を保存、ユーザ登録完了！
+\end{frame}
+
+\begin{frame}[fragile]
+\small
+テストコードで模擬するRPのAttestation検証動作結果を見てみよう。
+\begin{exampleblock}{\scriptsize RPによるPublicKeyCredentialの検証結果の例 (\texttt{\$ yarn test}の途中出力)}
 \tiny
  \begin{verbatim}
 LOG: '------ [Verification result on PublicKeyCredential.AuthenticatorAttestationResponse] ------'
-LOG: '> Verification result: true' // Credential Public KeyのAttestatationの署名検証成功
+LOG: '> Verification result: true'      ← Attestationの検証成功 (challenge/origin/署名の検証成功)
 
-LOG: '> Credential Public Key: // 新しく作ったCredential Public Key (毎回変化)
+LOG: '> Attested Credential Public Key: ← 検証が成功した Attested Credential Public Key (毎回変化; これを登録)
 -----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEt11IqJnVr2Wi4nIip57LPhoAejRG
 TH86zg3S7CUYSFibLqVOQrbQ00ADz9IpYHoKzQCbbHcl3o8Zj7WgHUy1yQ==
 -----END PUBLIC KEY-----'
 
-LOG: '> Attestation Certificate: // 上の公開鍵についてた署名を検証した公開鍵証明書 (固定)
+LOG: '> Attestation Certificate:        ← 認証器が送ってきたAttestation Certificate (固定)
 -----BEGIN CERTIFICATE-----
 MIICvDCCAaSgAwIBAgIEBMX+/DANBgkqhkiG9w0BAQsFADAuMSwwKgYDVQQDEyNZ
 dWJpY28gVTJGIFJvb3QgQ0EgU2VyaWFsIDQ1NzIwMDYzMTAgFw0xNDA4MDEwMDAw
@@ -803,8 +862,9 @@ NKnw+ttQUWKoZsPHtuzFx8NlazLQBep1W2T0FCONFEG7x/l+ZcfNhT13azAbaurJ
 2J0/ff6H0PXJP6h+Obne4xfz0+8ujftWDUSh9oaiVRYf+tgam/tzOKyEU38V2liV
 11zMyHKWrXiK0AfyDgb58ky2HSrn/AgE5MW/oXg/CXc=
 -----END CERTIFICATE-----'
- \end{verbatim}
+\end{verbatim}
 \end{exampleblock}
+実際に検証しているコードの解説は今回は省く。
 \end{frame}
 
 
@@ -826,7 +886,7 @@ WebAPIの観点では、認証器においてユーザ秘密鍵で署名生成�
 \end{frame}
 
 \begin{frame}
- 
+ 今回触ってみたことがWebAuthnの全体像ではないことに注意。あくまで1つの例と考えてもらってもいい。
 \end{frame}
 
 
