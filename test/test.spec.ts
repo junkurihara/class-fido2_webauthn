@@ -84,7 +84,7 @@ describe(`${envName}: Demo for User Registration`, () => {
     // Receive a random challenge and public key ID from Relaying Party (here we use a mock...)
     // 本当はここはRPからもらった乱数を利用することに注意する。
     const randomChallenge: ArrayBuffer = (jscu.random.getRandomBytes(32)).buffer;
-    const getOptions: CredentialCreationOptions = getCredentialDefaultArgs;
+    const getOptions: CredentialRequestOptions = getCredentialDefaultArgs;
     (<any>getOptions.publicKey).challenge = randomChallenge;
     (<any>getOptions.publicKey).allowCredentials[0].id = attestedCredentialPublicKeyRawId;
 

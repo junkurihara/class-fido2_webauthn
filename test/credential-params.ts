@@ -53,22 +53,37 @@ export const createCredentialDefaultArgs: CredentialCreationOptions = {
   }
 };
 
-// ログインのサンプル引数
-export const getCredentialDefaultArgs: {
-  [index: string]: {timeout: number, challenge: any, allowCredentials: any}
-} = {
+// Parameters for Authentication (Assertion)
+// https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredentialRequestOptions
+export const getCredentialDefaultArgs: CredentialRequestOptions = {
   publicKey: {
-    timeout: 60000,
-
-    challenge: new Uint8Array([ // サーバーから暗号学的にランダムな値が送られていなければならない
+    // Challenge
+    // 本当はサーバーで生成した暗号学的に安全な乱数をセット (16bytes以上)
+    challenge: new Uint8Array([
       0x79, 0x50, 0x68, 0x71, 0xDA, 0xEE, 0xEE, 0xB9, 0x94, 0xC3, 0xC2, 0x15, 0x67, 0x65, 0x26, 0x22,
       0xE3, 0xF3, 0xAB, 0x3B, 0x78, 0x2E, 0xD5, 0x6F, 0x81, 0x26, 0xE2, 0xA6, 0x01, 0x7D, 0x74, 0x50
     ]).buffer,
 
+    // Info of credential public keys allowed to use authentication (Optional)
+    // 認証器次第ではここが空、RPが指定しなくても問題ない (RP IDに応じてユーザが鍵を選べる, Client-side discoverable Credentialと呼ぶ)
     allowCredentials: [{
       id: (new Uint8Array()).buffer,
       transports: ['usb', 'nfc', 'ble'],
       type: 'public-key'
-    }]
+    }],
+
+    // rpId indicating Relying Party ID (default = current domain)
+    rpId: 'localhost',
+
+    // User verification (biometrics authentication, optional, default = 'preferred')
+    // PINが未指定の場合などは、'required'にすると検証不可として認証エラー
+    userVerification: 'required',
+
+    // Time out (optional)
+    timeout: 60000,
+
+    // Extensions (Optional)
+    // https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredentialRequestOptions/extensions
+    extensions: {}
   },
 };
