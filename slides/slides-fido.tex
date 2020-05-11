@@ -127,7 +127,7 @@
 \begin{itemize}
 \item Bash/Zsh, Gitが使えるようになっていること
 \item Node.js, npm, yarnが使えるようになっていること
-\item Google Chrome系ブラウザ and/or Firefoxが利用可能なこと
+\item Google Chromeブラウザが利用可能なこと
 \end{itemize}
 \end{frame}
 
@@ -536,6 +536,19 @@ AttCAでは、認証器のTPMに埋め込まれた鍵を、証明書生成では
 の両者において、\ul{localhostでRPを模擬}\footnote[frame]{\scriptsize ブラウザ・RPとのやりとりは標準がないことと、処理フロー・データフローを理解することに重点をおくため。しかしPython Flask等でREST APIでやりとりするサーバは簡単に実装可能。}しつつ、認証器・ブラウザ間でやりとりされるデータと、認証器内部での処理をコードを見ながら確認・解説していく。
 \end{frame}
 
+\begin{frame}[fragile]
+以下のコマンドをとりあえず叩いてみると、ブラウザ (Google Chrome) が立ち上がって認証器の挿入を求められることが確認できる。
+
+\begin{exampleblock}{\footnotesize ユーザ登録→ユーザ認証の一連のテストコードを実行}
+\footnotesize
+\begin{verbatim}
+$ yarn test // sampleディレクトリで実行
+\end{verbatim}
+\end{exampleblock}
+
+この時に行われている動作を解説する。
+\end{frame}
+
 
 \subsection{WebAuthn ユーザ登録フロー}
 
@@ -736,7 +749,7 @@ $\Rightarrow$
 '> Credential ID: HfM8J_xY7mn7bfiHxF7f7MLxf...' ← 生成した公開鍵のID
 '> Credential Raw ID: [object ArrayBuffer]'     ← 生成した公開鍵のIDのバイナリ版
 '> Credential Type: public-key'                 ← 公開鍵証明書なので'public-key'
-'> AuthenticatorAttestationResponse.clientDataJSON: [object ArrayBuffer]'   ← RPのChallengeに対する応答 (バイナリ)
+'> AuthenticatorAttestationResponse.clientDataJSON: [object ArrayBuffer]'   ← RPのChallengeの情報 (バイナリ)
 '> AuthenticatorAttestationResponse.attestationObject: [object ArrayBuffer]'← ここがCredential Public Keyと署名が含まれる本体 (バイナリ)
 \end{verbatim}
 }
@@ -765,7 +778,7 @@ LOG: '> Decoded clientDataJSON:
 {
   "challenge": "o9sKvn8ls2QAMFNyiv_g...", ← 登録処理開始の際、RPが送付したchallenge (base64url)。
   "origin": "http://localhost:9876",      ← Relying partyのID。今回の例だとlocalhost。
-  "type": "webauthn.create"               ← ユーザ登録のときは\texttt{webauthn.create}固定。
+  "type": "webauthn.create"               ← ユーザ登録のときはwebauthn.create固定。
 }'
 \end{verbatim}
 他、\texttt{tokenBindingId}というRPとの通信セッションとの紐付けを行うパラメタ (Optional)。
@@ -797,7 +810,8 @@ LOG: '> Decoded clientDataJSON:
     },
     "authData": {                         /* 署名対象、つまりCredential Public Keyのフィールド */
       "type": "Buffer",
-      "data": "SZYN5YgOjGh0NBcPZHZg..."   ← Credential Public Keyとそのメタ情報 (本当はバイナリ)
+      "data": "SZYN5YgOjGh0NBcPZHZg..."   ← Credential Public Keyとそのメタ情報(登録するRPのIDなど)、
+                                             ローカル生体認証の結果など (本当はバイナリ)
     }
   }
 ]'
@@ -864,7 +878,7 @@ NKnw+ttQUWKoZsPHtuzFx8NlazLQBep1W2T0FCONFEG7x/l+ZcfNhT13azAbaurJ
 -----END CERTIFICATE-----'
 \end{verbatim}
 \end{exampleblock}
-実際に検証しているコードの解説は今回は省く。
+署名検証のソースコード解説は、ただのフォーマット解説のため省略。
 \end{frame}
 
 
@@ -876,7 +890,183 @@ NKnw+ttQUWKoZsPHtuzFx8NlazLQBep1W2T0FCONFEG7x/l+ZcfNhT13azAbaurJ
 \end{frame}
 
 \begin{frame}{WebAuthn ユーザ認証フロー}
-WebAPIの観点では、認証器においてユーザ秘密鍵で署名生成。
+以下のような流れで、RPに登録されたユーザに対し、認証を行う。
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Figs/webauthn-authentication0.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}
+
+\end{frame}
+
+\begin{frame}{WebAuthn ユーザ認証: RPへユーザ認証要求}
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Figs/webauthn-authentication1.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}
+
+\end{frame}
+
+
+\begin{frame}{WebAuthn ユーザ認証: 認証器へAssertion生成要求}
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Figs/webauthn-authentication2.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{exampleblock}{\scriptsize \texttt{PublicKeyCredentialRequestOptions}の構造 (\texttt{./test/credential-params.ts})}
+\tiny
+\begin{verbatim}
+export const getCredentialDefaultArgs: CredentialRequestOptions = {
+  publicKey: {
+    // Challenge 本当はサーバーで生成した暗号学的に安全な乱数をセット (16bytes以上)
+    challenge: new Uint8Array([
+      0x79, 0x50, ...
+    ]).buffer,
+
+    // Info of credential public keys allowed to use authentication (optional)
+    // 認証器次第ではここをRPが指定しなくてもOK
+    // (RP IDに応じてユーザが鍵を選べる, Client-side discoverable Credentialと呼ぶ)
+    allowCredentials: [{
+      id: new Uint8Array([0xA1, 0x55, ...]).buffer,
+      transports: ['usb', 'nfc', 'ble'],
+      type: 'public-key'
+    }],
+
+    // rpId indicating Relying Party ID (optional, default = current domain)
+    rpId: 'localhost', // テストコードはローカルで走るため
+
+    // User verification (biometrics authentication, optional, default = 'preferred')
+    // PINが未指定の場合などは、'required'にすると検証不可として認証エラー
+    userVerification: 'required',
+
+    // Time out (optional, in msec)
+    timeout: 60000,
+  },
+};
+\end{verbatim}
+\end{exampleblock}
+ 
+\end{frame}
+
+\begin{frame}[fragile]
+\small
+\texttt{PublicKeyCredentialRequestOptions} Objectを使ってブラウザのWebAuthn APIを以下のようにCallすると、登録の時と同様に認証器の挿入・接続要求、\alert{PIN入力要求、認証要求がブラウザ通知}される。
+
+\begin{exampleblock}{\scriptsize \texttt{window.navigator.credential.get()}のCall (\texttt{./test/test.spec.ts})}
+{\scriptsize
+\begin{verbatim}
+const cred: Credential|null
+  = await window.navigator.credentials.get(getCredentialDefaultArgs);
+\end{verbatim}
+}
+\end{exampleblock}
+
+\begin{center}
+\begin{tabular}{ccc}
+\begin{minipage}{0.4\linewidth}
+ \centering
+ \includegraphics[width=\linewidth]{Figs/webauthn-registration-dialog2.png}\\
+ {\footnotesize PIN入力要求}
+\end{minipage}
+ &
+$\Rightarrow$
+&
+\begin{minipage}{0.4\linewidth}
+ \centering
+ \includegraphics[width=\linewidth]{Figs/webauthn-registration-dialog3.png}\\
+ {\footnotesize 認証要求}
+\end{minipage}
+\end{tabular}
+\end{center}
+\end{frame}
+
+\begin{frame}
+認証器にタッチすることで生体認証を完了させると、\alert{認証器内部でAssertion = Challengeへの署名生成が行われる。}
+\end{frame}
+
+\begin{frame}{WebAuthn ユーザ認証: Assertion生成・取り出し}
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Figs/webauthn-authentication3.pdf}
+\end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\small
+
+\texttt{get()}の返り値 \texttt{PulicKeyCredential} Objectは以下の要素で構成される。\texttt{create()}では\texttt{AuthenticatorAttestationResponse}が入っていたが、\alert{\texttt{AuthenticationAssertionResponse}が入ることに注意。}
+
+\begin{exampleblock}{\footnotesize PublicKeyCredentialの構造 (\texttt{\$ yarn test}の途中出力)}
+\tiny
+\begin{verbatim}
+LOG: '------ [Response from Authenticator: PublicKeyCredential] ------'
+LOG: '> Credential ID: jsQqwn1tT5C-I01ELUVq7m...'     ← 署名検証に用いる公開鍵のID = Credential Public Key ID
+LOG: '> Credential Raw ID: [object ArrayBuffer]'      ← IDのバイナリ版
+LOG: '> Credential Type: public-key'                  ← 署名は公開鍵で検証されるものなので'public-key'
+LOG: '> AuthenticatorAssertionResponse.clientDataJSON: [object ArrayBuffer]'   ← RPのChallengeの情報
+LOG: '> AuthenticatorAssertionResponse.authenticatorData: [object ArrayBuffer]'← 認証器の情報やRPのIDなど
+LOG: '> AuthenticatorAssertionResponse.signature: [object ArrayBuffer]'        ← RPのChallengeに対する応答＝署名！
+LOG: '> AuthenticatorAssertionResponse.userHandle: null'                       ← Create時に入力したユーザIDが入ることが多い
+\end{verbatim}
+\end{exampleblock}
+
+このうち、\texttt{AuthenticatorAssertionResponse}内部の4要素をRPに送って検証 (Assertionの検証)、認証可否を判断する。次ステップでその手順を解説する。
+\end{frame}
+
+
+
+\begin{frame}{WebAuthn ユーザ認証: Assertionの検証}
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Figs/webauthn-authentication4.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{exampleblock}{\scriptsize \texttt{clientDataJSON}の構造, \texttt{authenticatorData}, \texttt{signature} (\texttt{\$ yarn test}の途中結果)}
+\tiny
+\begin{verbatim}
+LOG: '------ [Decoding result of elements of AuthenticatorAssertionResponse] ------'
+LOG: '> Decoded clientDataJSON: {
+  "challenge": "rHNRQ6copASyNLyFv0Ja...", ← 認証処理開始の際、RPが送付したchallenge (base64url)
+  "origin": "http://localhost:9876",      ← RP ID
+  "type": "webauthn.get"                  ← ユーザ認証の時はwebauthn.get固定。
+}'
+
+
+LOG: '> Base64 authenticatorData: SZYN5YgOj...' ← 認証器の情報やCredentialが紐付けられているRP IDなどのデータ
+
+
+LOG: '> Base64 signature: MEYCIQDI0cKyqpksA...' ← clientDataJSONとauthenticatorDataに対して作られた署名
+\end{verbatim}
+\end{exampleblock}
+\textbf{clientDataJSONのハッシュ値とauthenticatorDataを連結したデータに対してCredential Private Keyで署名生成}されている。
+
+\vspace{1ex}
+
+$\Rightarrow$ 連結データに対してsignatureが正しいものかどうかを検証。
+\end{frame}
+
+\begin{frame}
+\small
+RPは\texttt{authenticatorData}、\texttt{signature}、\texttt{clientDataJSON}に対して以下を検証する。(=\alert{Assertionの検証})
+\end{frame}
+
+
+\begin{frame}[fragile]
+テストコードで模擬するRPのAssertion検証結果を見てみよう。
+\begin{exampleblock}{\scriptsize assertion検証結果 (\texttt{\$ yarn test}の途中結果)}
+\tiny
+\begin{verbatim}
+LOG: '------ [Verification result on PublicKeyCredential.AuthenticatorAssertionResponse] ------'
+LOG: '> Verification result: true' ← Assertionの検証成功 (challenge/origin/署名の検証成功)
+\end{verbatim}
+\end{exampleblock}
+Assertion検証のソースコード解説は、ただのフォーマット解説のため省略。
 \end{frame}
 
 \section{まとめ}
