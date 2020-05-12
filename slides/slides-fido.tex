@@ -402,7 +402,7 @@ $\Rightarrow$ この2つが\alert{FIDO2 WebAuthnのパスワードレス認証�
 \item \alert{プロジェクトのGitHubリポジトリをClone}\\
 \begin{exampleblock}{}
 \footnotesize
-\$ \texttt{git clone https://github.com/junkurihara/xxxxxxxxxxxxxxxxxxxx}\\
+\$ \texttt{git clone https://github.com/junkurihara/class-fido2\_webauthn.git}\\
 \$ \texttt{cd sample}
 \end{exampleblock}
 \item 依存パッケージのインストール
@@ -476,7 +476,7 @@ FIDO2 WebAuthnは、2つの動作フローを規定する。
 FIDO2では、「Attestation」という重要な概念が存在する。
 
 \begin{block}{\small FIDO2におけるAttestation}
-主として、「新しく生成・登録するユーザの公開鍵が、\alert{正しくFIDO2認定を受けている認証器で生成された公開鍵であることを保証する機構}という意味。すなわち、\textbf{出生証明}。
+主として、「新しく生成・登録するユーザの公開鍵が、\alert{正しくFIDO2認定を受けている認証器で生成された公開鍵であることを保証する機構}」という意味。すなわち、\textbf{出生証明}。
 \end{block}
 \begin{center}
 \begin{tabular}{ll}
@@ -894,30 +894,50 @@ NKnw+ttQUWKoZsPHtuzFx8NlazLQBep1W2T0FCONFEG7x/l+ZcfNhT13azAbaurJ
 \begin{center}
 \includegraphics[width=0.9\linewidth]{Figs/webauthn-authentication0.pdf}
 \end{center}
+\textbf{RPで生成したChallengeに対して認証器内部で署名させ、その検証結果で事前に登録したユーザかどうかを判別・認証}する処理。
 \end{frame}
 
 \begin{frame}
+登録処理の場合同様、ユーザ認証の各ステップを実際のデータを確認しながら追っていく。
 
+\begin{block}{\small ``Assertion''について}
+ユーザ登録の時、Credential (Key Pair)の「認証器による出生証明」を``Attestation''と呼んだ。
+これと同様に\alert{FIDO2 WebAuthnでは、ユーザ認証において「認証器による正当性の主張」を``Assertion''と呼ぶ}。
+すなわち、\textbf{Assertionの検証を行うことで、RPは正当性の主張を受入れ認証OKとする}。
+\end{block}
 \end{frame}
 
 \begin{frame}{WebAuthn ユーザ認証: RPへユーザ認証要求}
 \begin{center}
+⓪,① Challengeと署名させるCredentialのIDをRPから取得。
 \includegraphics[width=0.9\linewidth]{Figs/webauthn-authentication1.pdf}
 \end{center}
+登録同様、WebApp・RP間のやりとりは規定されておらず、実装者に任されている。
 \end{frame}
 
 \begin{frame}
+WebAppがRPから取得する必要があるパラメタは以下の通り。
+\begin{itemize}
+ \item \textbf{Challenge}: \alert{暗号学的にランダムな使い捨てのbinary string (最低16bytes, 通常32bytes程度)}
+ \item \textbf{Credential Info}: ユーザのCredential Public KeyのID。認証器に対応するCredential Private Key (署名鍵) を指定するのに必要。規格上はOptionalだが\alert{認証器が非対応の場合は指定が必須。}\footnote[frame]{\scriptsize Client-side Discoverable Credential (後述) に対応していることが必要。Security Key by Yubicoは非対応。}
+\end{itemize}
 
+\vspace{2ex}
+
+ブラウザはこれらを\texttt{PublicKeyCredentialRequestOptions} Objectにし、WebAuthn API経由で認証器へAssertionを要求。
 \end{frame}
 
 
 \begin{frame}{WebAuthn ユーザ認証: 認証器へAssertion生成要求}
+②,③ ブラウザのAPIを通して認証器へAssertionを要求。
 \begin{center}
 \includegraphics[width=0.9\linewidth]{Figs/webauthn-authentication2.pdf}
 \end{center}
+\texttt{PublicKeyCredentialRequestOptions} Objectをブラウザの\texttt{window.navigator.credential.get()}へ入力。
 \end{frame}
 
 \begin{frame}[fragile]
+実際にJavaScriptのコードを見ていく。
 \begin{exampleblock}{\scriptsize \texttt{PublicKeyCredentialRequestOptions}の構造 (\texttt{./test/credential-params.ts})}
 \tiny
 \begin{verbatim}
@@ -930,7 +950,7 @@ export const getCredentialDefaultArgs: CredentialRequestOptions = {
 
     // Info of credential public keys allowed to use authentication (optional)
     // 認証器次第ではここをRPが指定しなくてもOK
-    // (RP IDに応じてユーザが鍵を選べる, Client-side discoverable Credentialと呼ぶ)
+    // (RP IDに応じてユーザが鍵を選べる, Client-side Discoverable Credentialと呼ぶ)
     allowCredentials: [{
       id: new Uint8Array([0xA1, 0x55, ...]).buffer,
       transports: ['usb', 'nfc', 'ble'],
@@ -987,12 +1007,29 @@ $\Rightarrow$
 
 \begin{frame}
 認証器にタッチすることで生体認証を完了させると、\alert{認証器内部でAssertion = Challengeへの署名生成が行われる。}
+
+\vspace{2ex}
+
+\begin{exampleblock}{\footnotesize 補足: Client-side Discoverable Credentialについて}
+\small
+\texttt{PublicKeyCredentialRequestOptions}において、\texttt{allowCredentials}なしとするClient-side Discoverable Credential\footnote[frame]{\scriptsize 現在の仕様(ver. 4 Mar. 2019)上はResident Credentialと呼ばれているが、Working Draftで名称が変わった。\url{https://w3c.github.io/webauthn/\#client-side-discoverable-credential}}が利用できる。
+この機能は、以下の特徴を持つ。
+\begin{itemize}
+\item 認証時にRPからCredential IDを取得する必要がなく、ユーザ自身がRP IDに応じてCredentialを切り替え可能
+\item RP側でユーザ名などとCredential IDの紐付け管理が不要
+\end{itemize}
+ただし、利用には\structure{認証器がこの機能に対応している必要}がある。
+\end{exampleblock}
 \end{frame}
 
+
 \begin{frame}{WebAuthn ユーザ認証: Assertion生成・取り出し}
+\small
+④,⑤ 認証器でChallengeへ署名し、Assertionを取得。
 \begin{center}
 \includegraphics[width=0.9\linewidth]{Figs/webauthn-authentication3.pdf}
 \end{center}
+前ステップの\texttt{get()}の返り値として、署名(\texttt{signature})やメタ情報(\texttt{authenticatorData})を格納した\texttt{PublicKeyCredential} Objectを取得。
 \end{frame}
 
 
@@ -1021,12 +1058,19 @@ LOG: '> AuthenticatorAssertionResponse.userHandle: null'                       �
 
 
 \begin{frame}{WebAuthn ユーザ認証: Assertionの検証}
+\small
+⑥,⑦,⑧ ブラウザが\texttt{AutehtncatorAssertionResponse}をRPへ送って、そこでAssertionの検証と認証可否判断を行う。
 \begin{center}
 \includegraphics[width=0.9\linewidth]{Figs/webauthn-authentication4.pdf}
 \end{center}
+\alert{Assertionの検証はRPの行うバックエンドの処理なことに注意。}
 \end{frame}
 
 \begin{frame}[fragile]
+\small 
+
+\texttt{AuthenticatorAssertionResponse}の要素の構造は以下の通り。
+
 \begin{exampleblock}{\scriptsize \texttt{clientDataJSON}の構造, \texttt{authenticatorData}, \texttt{signature} (\texttt{\$ yarn test}の途中結果)}
 \tiny
 \begin{verbatim}
@@ -1048,12 +1092,23 @@ LOG: '> Base64 signature: MEYCIQDI0cKyqpksA...' ← clientDataJSONとauthenticat
 
 \vspace{1ex}
 
-$\Rightarrow$ 連結データに対してsignatureが正しいものかどうかを検証。
+$\Rightarrow$ RPはこの連結データに対してsignatureが正しいものかどうかを検証。
 \end{frame}
 
 \begin{frame}
 \small
 RPは\texttt{authenticatorData}、\texttt{signature}、\texttt{clientDataJSON}に対して以下を検証する。(=\alert{Assertionの検証})
+\begin{enumerate}
+ \item \textbf{RP自身が要求したAssertion作成なのか？}\\
+$\Rightarrow$ \texttt{clientDataJSON}内部と、RPで保持していたチャレンジの比較
+ \item \textbf{RPのサービスで認証すべき要求なのか？}\\
+\begin{itemize}
+ \item[$\Rightarrow$] \texttt{clientDataJSON}内部のoriginのチェック
+ \item[$\Rightarrow$] \texttt{authenticatorData}に含まれるRP IDのチェック
+\end{itemize}
+ \item \textbf{事前登録したユーザ・認証器によって作られたAssertionか？}\\
+$\Rightarrow$ Credential IDが紐づいているAttested Credential Public Keyを登録ユーザのDBから取得。\alert{\texttt{clientDataJSON}のハッシュ値と\texttt{authenticatorData}について、\texttt{signature} (署名) の正しさを、Credential Public Keyで検証。}
+\end{enumerate}
 \end{frame}
 
 
@@ -1076,9 +1131,25 @@ Assertion検証のソースコード解説は、ただのフォーマット解�
 \end{frame}
 
 \begin{frame}
- 今回触ってみたことがWebAuthnの全体像ではないことに注意。あくまで1つの例と考えてもらってもいい。
+この資料では以下を行った。
+\begin{itemize}
+ \item 認証の基礎と、FIDO2の概要の紹介
+ \item FIDO2 WebAuthnの概要の紹介
+ \item FIDO2 WebAuthnのユーザ登録・認証についてコードレベルで動作解説
+\end{itemize}
+
+ただし、今回触ってみたことがWebAuthnの全体像ではないことに注意。仕様は日々進化しており、またパラメタもここで掲載したもの以外にも多く存在する。あくまで1つの例と考えてほしい。
 \end{frame}
 
+
+\begin{frame}{参考資料: WebAuthnの標準文書・仕様書}
+\small
+\begin{itemize}
+ \item Web Authentication (W3C勧告)\\ \url{https://www.w3.org/TR/webauthn-1}
+ \item Web Authentication (W3C Working Draft)\\ \url{https://w3c.github.io/webauthn}
+ \item Web Authentication API (MDN)\\ \url{https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API}
+\end{itemize}
+\end{frame}
 
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
