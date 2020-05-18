@@ -245,22 +245,16 @@ FIDO認証の特徴:
 \begin{frame}{FIDO2の要素}
 FIDO2は、\alert{WebAuthn (Web Authentication)\footnote[frame]{\tiny Spec: \url{https://www.w3.org/TR/webauthn-1/}}と、CTAP (Client-to-Authenticator Protocol)\footnote[frame]{\tiny Spec: \url{https://fidoalliance.org/specs/fido2/fido-client-to-authenticator-protocol-v2.1-rd-20191217.html}}の2つの要素で構成}される。
 
-\begin{figure}
-\begin{center}
-\includegraphics[width=0.9\linewidth]{Figs/FIDO2-Graphic-v2.png}
-\caption{\footnotesize \textcopyright FIDO Alliance, from \url{https://fidoalliance.org/specifications/}}
-\end{center}
-\end{figure}
-\end{frame}
-
-\begin{frame}
-\small 
 \begin{itemize}
  \item \textbf{WebAuthn}: 内部/外部認証器をCallするWebAPIと、WebApp・サーバ間のデータフローを規定。
  \item \textbf{CTAP}: 外部認証器をCallするAPIと、クライアント/プラットフォームと認証器の通信プロトコルを規定。
 \end{itemize}
+\end{frame}
+
+\begin{frame}
+図で見るとCTAP・WebAuthnは以下のような役割分担。
 \begin{center}
-\includegraphics[width=0.7\linewidth]{Figs/FIDO2-spec-structure.pdf}
+\includegraphics[width=0.8\linewidth]{Figs/FIDO2-spec-structure.pdf}
 \end{center}
 \end{frame}
 
@@ -585,7 +579,7 @@ WebAppがRPから取得するパラメタは以下の通り。\footnote[frame]{\
 \begin{itemize}
  \item \textbf{Challenge}: \alert{暗号学的にランダムな使い捨てのbinary string (最低16bytes, 通常32bytes程度)}
  \item \textbf{User Info}: ユーザ情報。ID、メールアドレス、名前。
- \item \textbf{Relying Party Info}: RP(すなわちサービス)の名前、FQDN、アイコンのアドレス。
+ \item \textbf{Relying Party Info}: RP(すなわちサービス)の名前、FQDN、サービスアイコンのURL (icoファイル)。
 \end{itemize}
 
 \vspace{2ex}
@@ -603,7 +597,8 @@ WebAppがRPから取得するパラメタは以下の通り。\footnote[frame]{\
 
 \begin{frame}[fragile]
 \small
-実際にJavaScriptのコードを見ていく。
+\textbf{②: \texttt{認証器に送るオブジェクトの生成}}
+
 \begin{exampleblock}{\scriptsize \texttt{PublicKeyCredentialCreationOptions}の構造 (\texttt{./test/credential-params.ts)}}
 {\tiny
 \begin{verbatim}
@@ -645,6 +640,8 @@ const createCredentialDefaultArgs: CredentialCreationOptions = {
 
 \begin{frame}[fragile]
 \small
+\textbf{③: \texttt{認証器へオブジェクト送付}}\\[2ex]
+
 \texttt{PublicKeyCredentialCreationOptions} Objectを使ってブラウザのWebAuthn APIを以下のようにCallすると、\alert{認証器の挿入・接続要求、PIN入力要求がブラウザ通知}される。
 
 \begin{exampleblock}{\scriptsize \texttt{window.navigator.credential.create()}のCall (\texttt{./test/test.spec.ts})}
@@ -703,6 +700,8 @@ $ yarn test
 
 \begin{frame}
 \small
+\textbf{④-1: ローカルでの生体認証}\\[2ex]
+
 前ステップの後、認証器ローカルでの生体認証\footnote[frame]{\scriptsize Security Key by Yubicoの場合、PIN入力の後にタッチすること。}、およびFIDO2 WebAuthnの利用確認が求められる。
 
 \vspace{2ex}
@@ -725,6 +724,8 @@ $\Rightarrow$
 \end{frame}
 
 \begin{frame}
+\textbf{④-2: Credential Key Pairの新規生成・署名付与}\\[2ex]
+
 \small
 認証と利用意思確認が完了すると、認証器内部で以下の処理を実行。
 \begin{enumerate}
@@ -735,12 +736,14 @@ $\Rightarrow$
  \item (Attested) Credential Public Keyとその署名を出力\footnote[frame]{\scriptsize Attestation Type: directの場合はAttestation Certificateも出力}
 \end{enumerate}
 \begin{center}
-\includegraphics[width=0.6\linewidth]{Figs/webauthn-attestation.pdf}
+\includegraphics[width=0.5\linewidth]{Figs/webauthn-attestation.pdf}
 \end{center}
 \end{frame}
 
 \begin{frame}[fragile]
 \small
+\textbf{⑤: ブラウザにて\texttt{PublicKeyCredential}の取得}\\[2ex]
+
 \texttt{create()}の返り値 \texttt{PublicKeyCredential} Objectは単純に以下の4つの要素で構成されている。
 \begin{exampleblock}{\scriptsize PublicKeyCredentialの構造 (\texttt{\$ yarn test}の途中出力)}
 {\tiny
@@ -769,6 +772,9 @@ $\Rightarrow$
 \end{frame}
 
 \begin{frame}[fragile]
+\textbf{⑥: ブラウザにて認証器出力をパース、RPへの応答を作成}\\
+\textbf{⑦: \texttt{attestationObject}と\texttt{clientdataJSON}をRPへ送付}\\[2ex]
+
 \texttt{clientDataJSON}はバイナリにエンコードされたJSONで、以下の要素で構成。
 \begin{exampleblock}{\footnotesize \texttt{clientDataJSON}\footnote[frame]{\tiny WebAuthnの認証の時もパラメータの異なるこのオブジェクトが生成される。\url{https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorResponse/clientDataJSON}}の構造。 (\texttt{\$ yarn testの途中結果})}
 \tiny
@@ -788,8 +794,11 @@ LOG: '> Decoded clientDataJSON:
 
 \begin{frame}[fragile]
 \small
-\texttt{attestationObject}はCBORで表現され、以下の要素で構成。
-\begin{exampleblock}{\footnotesize \texttt{attestationObject}\footnote[frame]{\tiny \texttt{clientDataJSON}と異なり、登録の時のみ生成されるオブジェクト。\url{https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAttestationResponse/attestationObject}}の構造。 (\texttt{\$ yarn testの途中結果})}
+\texttt{attestationObject}はCBOR\footnote[frame]{\tiny Concise Binary Object Representation。バイナリのJSONのようなもの。}で表現され、以下の要素で構成。
+
+\vspace{-1ex}
+
+\begin{exampleblock}{\footnotesize \texttt{attestationObject}\footnote[frame]{\tiny \texttt{clientDataJSON}と異なり、登録の時のみ生成されるオブジェクト。}の構造。 (\texttt{\$ yarn testの途中結果})}
 {\tiny
 \begin{verbatim}
 [
@@ -818,11 +827,16 @@ LOG: '> Decoded clientDataJSON:
 \end{verbatim}
 }
 \end{exampleblock}
-fmt=``packed''の場合、\textbf{署名は、\texttt{clientDataJSON}のハッシュ値と、\texttt{attestationObject.authData}を連結したデータに対して生成。}
+\vspace{-1ex}
+
+{\footnotesize
+fmt=``packed''の場合、\textbf{署名は、\texttt{clientDataJSON}のハッシュ値と、\texttt{attestationObject.authData}を連結したデータに対して生成。}}
 \end{frame}
 
 \begin{frame}
 \small
+\textbf{⑧: RPによる検証・登録}\\[2ex]
+
 RPは\texttt{attestationObject}と\texttt{clientDataJSON}について以下を検証。
 
 \begin{enumerate}
@@ -894,7 +908,7 @@ NKnw+ttQUWKoZsPHtuzFx8NlazLQBep1W2T0FCONFEG7x/l+ZcfNhT13azAbaurJ
 \begin{center}
 \includegraphics[width=0.9\linewidth]{Figs/webauthn-authentication0.pdf}
 \end{center}
-\textbf{RPで生成したChallengeに対して認証器内部で署名させ、その検証結果で事前に登録したユーザかどうかを判別・認証}する処理。
+RPで生成した\textbf{Challengeに対して認証器内部で署名}させ、その検証結果で事前に登録したユーザかどうかを判別・認証する処理。
 \end{frame}
 
 \begin{frame}
@@ -937,6 +951,7 @@ WebAppがRPから取得する必要があるパラメタは以下の通り。
 \end{frame}
 
 \begin{frame}[fragile]
+\textbf{②: 認証器に送るオブジェクトの生成}\\[2ex]
 実際にJavaScriptのコードを見ていく。
 \begin{exampleblock}{\scriptsize \texttt{PublicKeyCredentialRequestOptions}の構造 (\texttt{./test/credential-params.ts})}
 \tiny
@@ -975,6 +990,8 @@ export const getCredentialDefaultArgs: CredentialRequestOptions = {
 
 \begin{frame}[fragile]
 \small
+\textbf{③: 認証器へオブジェクト送付}\\[2ex]
+
 \texttt{PublicKeyCredentialRequestOptions} Objectを使ってブラウザのWebAuthn APIを以下のようにCallすると、登録の時と同様に認証器の挿入・接続要求、\alert{PIN入力要求、認証要求がブラウザ通知}される。
 
 \begin{exampleblock}{\scriptsize \texttt{window.navigator.credential.get()}のCall (\texttt{./test/test.spec.ts})}
@@ -985,31 +1002,10 @@ const cred: Credential|null
 \end{verbatim}
 }
 \end{exampleblock}
-
-\begin{center}
-\begin{tabular}{ccc}
-\begin{minipage}{0.4\linewidth}
- \centering
- \includegraphics[width=\linewidth]{Figs/webauthn-registration-dialog2.png}\\
- {\footnotesize PIN入力要求}
-\end{minipage}
- &
-$\Rightarrow$
-&
-\begin{minipage}{0.4\linewidth}
- \centering
- \includegraphics[width=\linewidth]{Figs/webauthn-registration-dialog3.png}\\
- {\footnotesize 認証要求}
-\end{minipage}
-\end{tabular}
-\end{center}
 \end{frame}
 
+
 \begin{frame}
-認証器にタッチすることで生体認証を完了させると、\alert{認証器内部でAssertion = Challengeへの署名生成が行われる。}
-
-\vspace{2ex}
-
 \begin{exampleblock}{\footnotesize 補足: Client-side Discoverable Credentialについて}
 \small
 \texttt{PublicKeyCredentialRequestOptions}において、\texttt{allowCredentials}なしとするClient-side Discoverable Credential\footnote[frame]{\scriptsize 現在の仕様(ver. 4 Mar. 2019)上はResident Credentialと呼ばれているが、Working Draftで名称が変わった。\url{https://w3c.github.io/webauthn/\#client-side-discoverable-credential}}が利用できる。
@@ -1032,9 +1028,33 @@ $\Rightarrow$
 前ステップの\texttt{get()}の返り値として、署名(\texttt{signature})やメタ情報(\texttt{authenticatorData})を格納した\texttt{PublicKeyCredential} Objectを取得。
 \end{frame}
 
+\begin{frame}
+\textbf{④: ローカルでの生体認証・認証器でのAssertion生成}\\[2ex]
+
+認証器にタッチすることで生体認証を完了させると、\alert{認証器内部でAssertion = Challengeへの署名生成が行われる。}
+
+\begin{center}
+\begin{tabular}{ccc}
+\begin{minipage}{0.4\linewidth}
+ \centering
+ \includegraphics[width=\linewidth]{Figs/webauthn-registration-dialog2.png}\\
+ {\footnotesize PIN入力要求}
+\end{minipage}
+ &
+$\Rightarrow$
+&
+\begin{minipage}{0.4\linewidth}
+ \centering
+ \includegraphics[width=\linewidth]{Figs/webauthn-registration-dialog3.png}\\
+ {\footnotesize 認証要求}
+\end{minipage}
+\end{tabular}
+\end{center}
+\end{frame}
 
 \begin{frame}[fragile]
 \small
+\textbf{⑤: ブラウザにて\texttt{PublicKeyCredentialObject}の取得}\\[2ex]
 
 \texttt{get()}の返り値 \texttt{PulicKeyCredential} Objectは以下の要素で構成される。\texttt{create()}では\texttt{AuthenticatorAttestationResponse}が入っていたが、\alert{\texttt{AuthenticationAssertionResponse}が入ることに注意。}
 
@@ -1068,6 +1088,8 @@ LOG: '> AuthenticatorAssertionResponse.userHandle: null'                       �
 
 \begin{frame}[fragile]
 \small 
+\textbf{⑥: ブラウザにて認証器出力をパース、RPへの応答を作成}\\
+\textbf{⑦: \textbf{clientDataJSON}・\textbf{authenticatorData}・\textbf{signature}をRPへ送付}\\[2ex]
 
 \texttt{AuthenticatorAssertionResponse}の要素の構造は以下の通り。
 
@@ -1096,6 +1118,7 @@ $\Rightarrow$ RPはこの連結データに対してsignatureが正しいもの�
 \end{frame}
 
 \begin{frame}
+\textbf{⑧: RPによる検証・認証可否の決定}
 \small
 RPは\texttt{authenticatorData}、\texttt{signature}、\texttt{clientDataJSON}に対して以下を検証する。(=\alert{Assertionの検証})
 \begin{enumerate}
