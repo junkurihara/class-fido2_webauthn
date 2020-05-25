@@ -1,0 +1,73 @@
+% 定理環境
+% \newtheorem{theorem}{Theorem}
+% \newtheorem{lemma}[theorem]{Lemma}
+% \newtheorem{corollary}[theorem]{Corollary}
+% \newtheorem{definition}[theorem]{Definition}
+% \newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 各種コマンド定義等
+\def\Fig#1{Fig.\@\ref{#1}}
+\def\Table#1{Table~\ref{#1}}
+\def\Eq#1{Eq.\@(\ref{#1})}
+\def\Eqs#1{Eqs.\@(\ref{#1})}
+\def\Thm#1{Theorem~\ref{#1}}
+\def\Lma#1{Lemma~\ref{#1}}
+\def\Sect#1{Section~\ref{#1}}
+\def\Rmk#1{Remark~\ref{#1}}
+\def\Prop#1{Proposition~\ref{#1}}
+\def\Coro#1{Corollary~\ref{#1}}
+\def\Def#1{Definition~\@\ref{#1}}
+\def\Prob#1{Problem~\@\ref{#1}}
+\def\ie{{i.\@e.\@,~}}
+\def\eg{{e.\@g.\@,~}}
+\def\etal{{et al.}}
+
+% 数式環境用
+\def\rank{\mathsf{rank}\, }
+\def\dim{\mathsf{dim}\, }
+\def\rspace{\mathsf{span}}
+\def\supp{\mathsf{supp}}
+%\def\vec#1{\mathbf{#1}}
+\def\F{\mathbb{F}}
+\def\wt{\mathsf{wt}}
+\def\c{\mathcal{C}}
+\def\dc{\mathcal{C}^{\perp}}
+\def\d{\mathcal{D}}
+\def\dd{\mathcal{D}^{\perp}}
+\def\g{\mathcal{G}}
+\def\dg{\mathcal{G}^{\perp}}
+\def\p{\mathcal{P}}
+% \def\rspace{\mathsf{span}}
+\def\supp{\mathsf{supp}}
+\def\ker{\mathsf{Ker\ }}
+
+%\def\bari#1{\{\widebar{#1}\}}
+\def\bari#1{\,\overline{{\!\{#1\}\!}}\,}
+%\def\bari#1{\bar{\{#1\}}}
+\def\vecxi{Z_{\bari{i}}}
+%\def\vecsxi{\vec{z}_i}
+\def\tvector{X}
+\def\tpackets{X_1,\dots,X_n}
+\def\mvector{S}
+\def\mpackets{S_1,\dots,S_l}
+\def\rvector{Y}
+\def\wvector{W}
+\def\cvector{C}
+\def\cword{C_{1},\dots,C_{l+n}}
+\def\pcword{C_{l+1},\dots,C_{l+n}}
+\def\randvector{R}
+
+\def\compmat{\Phi}
+
+%\def\vec#1{\mbox{\boldmath $#1$}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%上線 widebar, Widebar
+\usepackage{accents}
+\makeatletter
+\def\widebar{\accentset{{\cc@style\underline{\mskip11mu}}}}
+\makeatother
