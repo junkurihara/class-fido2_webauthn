@@ -5454,10 +5454,10 @@ webpack-log@^2.0.0:
     ansi-colors "^3.0.0"
     uuid "^3.3.2"
 
-webpack-merge@5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/webpack-merge/-/webpack-merge-5.0.3.tgz#d3bba03cc11bf43719bd058342842b16528f6779"
-  integrity sha512-DDbqWyHYBUxoxjysYRnfP30puLciPTZ0BQ3v3/l2OrafinwKurCQhzKUa3L7u8w469tcVWDxAbqQM13KXeij8g==
+webpack-merge@5.0.7:
+  version "5.0.7"
+  resolved "https://registry.yarnpkg.com/webpack-merge/-/webpack-merge-5.0.7.tgz#78be2f360ac1897f41a4b3288e1d83319e4f770e"
+  integrity sha512-IxTERB8mNelEUN7YLSBhKMA0t/AySs0GGcUczNWWZTsNMKEFst4MM1t4aHX4ANAqVHO02A2zPPVXcdfv5Qpslw==
   dependencies:
     clone-deep "^4.0.1"
     wildcard "^2.0.0"
