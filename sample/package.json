@@ -41,7 +41,7 @@
     "karma-mocha-reporter": "2.2.5",
     "karma-sourcemap-loader": "0.3.7",
     "karma-webpack": "4.0.2",
-    "mocha": "8.0.1",
+    "mocha": "8.1.0",
     "ts-loader": "8.0.1",
     "typescript": "3.9.7",
     "webpack": "4.44.1",
