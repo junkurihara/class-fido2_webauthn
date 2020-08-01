@@ -22,7 +22,7 @@
   "author": "Jun Kurihara",
   "license": "MIT",
   "devDependencies": {
-    "@types/cbor": "5.0.0",
+    "@types/cbor": "5.0.1",
     "@types/chai": "4.2.12",
     "@types/mocha": "8.0.1",
     "@types/node": "12.12.53",
