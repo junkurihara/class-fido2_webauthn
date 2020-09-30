@@ -52,7 +52,7 @@
   "dependencies": {
     "@fidm/x509": "1.2.1",
     "cbor": "5.1.0",
-    "js-crypto-utils": "0.18.3",
+    "js-crypto-utils": "1.0.0",
     "js-encoding-utils": "0.5.6"
   }
 }
