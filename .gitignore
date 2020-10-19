@@ -11,3 +11,4 @@ dist/
 coverage/
 参考/
 *.pptx
+yarn.lock
