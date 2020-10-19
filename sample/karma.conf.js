@@ -61,6 +61,11 @@ module.exports = (config) => {
         }
     },
 
+    client: {
+      jasmine: {
+        random: false
+      }
+    },
 
     // web server port
     port: 9876,
